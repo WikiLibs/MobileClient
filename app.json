@@ -2,11 +2,16 @@
   "name": "MobileClient",
   "displayName": "MobileClient",
   "expo": {
-    "name": "MobileClient",
-    "slug": "MobileClient",
+    "name": "WikiLibs",
+    "slug": "WikiLibs",
+    "icon": "./resources/WikiLibs_Logo.png",
     "version": "1.0.0",
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "android": {
+      "package": "com.wikilibsteam.wikilibs",
+      "versionCode": 1
+    }
   }
 }
