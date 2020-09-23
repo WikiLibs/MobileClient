@@ -10,7 +10,7 @@
       "**/*"
     ],
     "splash": {
-      "image": "./resources/app_splash_screen",
+      "image": "./resources/app_splash_screen.png",
       "backgroundColor": "#4c3da8"
     },
     "android": {
