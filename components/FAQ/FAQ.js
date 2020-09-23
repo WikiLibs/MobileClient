@@ -12,44 +12,23 @@ import * as Animatable from 'react-native-animatable';
 import Collapsible from 'react-native-collapsible';
 import Accordion from 'react-native-collapsible/Accordion';
 
-const BACON_IPSUM =
-    'Bacon ipsum dolor amet chuck turducken landjaeger tongue spare ribs. Picanha beef prosciutto meatball turkey shoulder shank salami cupim doner jowl pork belly cow. Chicken shankle rump swine tail frankfurter meatloaf ground round flank ham hock tongue shank andouille boudin brisket. ';
-
 const CONTENT = [
     {
-        title: 'First',
-        content: BACON_IPSUM,
+        title: '+ What is WikiLibs ?',
+        content: 'WikiLibs is a website regrouping programming library from different languages, with a unified design to enhance your learning.',
     },
     {
-        title: 'Second',
-        content: BACON_IPSUM,
+        title: '+ How does the website work ?',
+        content: 'For a quickstart, just type the library you want in the search bar. You can also look for it in the sidebar in case you just want a look.\nAlso, you can contribute to the site in two ways. First, you can upload your own example for a symbol (like a function) to help other people. Second, you can upload a whole library to the site, using the Parsing Tool (see below). You should own the library and/or have the necessary permissions to do so.',
     },
     {
-        title: 'Third',
-        content: BACON_IPSUM,
+        title: '+ How to contact us ?',
+        content: 'You have a question ? A feedback ? Just go to our contact page and check the different ways to contact us !',
     },
     {
-        title: 'Fourth',
-        content: BACON_IPSUM,
-    },
-    {
-        title: 'Fifth',
-        content: BACON_IPSUM,
-    },
-];
-
-const SELECTORS = [
-    {
-        title: 'First',
-        value: 0,
-    },
-    { 
-        title: 'Third',
-        value: 2,
-    },
-    {
-        title: 'None',
-    },
+        title: '+ I lost my password.',
+        content: 'Please check the login page and follow the links.',
+    }
 ];
 
 export default class FAQ extends React.Component {
@@ -73,7 +52,7 @@ export default class FAQ extends React.Component {
         return (
             <Animatable.View
                 duration={400}
-                style={[styles.header, isActive ? styles.active : styles.inactive]}
+                style={styles.header}
                 transition="backgroundColor"
             >
                 <Text style={styles.headerText}>{section.title}</Text>
@@ -83,15 +62,13 @@ export default class FAQ extends React.Component {
     
     renderContent(section, _, isActive) {
         return (
-            <Animatable.View
-                duration={400}
-                style={[styles.content, isActive ? styles.active : styles.inactive]}
+            <View
+                duration={100}
+                style={styles.content}
                 transition="backgroundColor"
             >
-                <Animatable.Text animation={isActive ? 'bounceIn' : undefined}>
-                    {section.content}
-                </Animatable.Text>
-            </Animatable.View>
+                <Text>{section.content}</Text>
+            </View>
         );
       }
     
@@ -99,93 +76,43 @@ export default class FAQ extends React.Component {
         const { multipleSelect, activeSections } = this.state;
     
         return (
-            <View style={styles.container}>
-                <ScrollView contentContainerStyle={{ paddingTop: 30 }}>
-                    <Text style={styles.title}>Accordion Example</Text>
-                    <View style={styles.multipleToggle}>
-                        <Text style={styles.multipleToggle__title}>Multiple Select?</Text>
-                        <Switch
-                            value={multipleSelect}
-                            onValueChange={a => this.setState({ multipleSelect: a })}
-                        />
-                    </View>
-                    <View style={styles.selectors}>
-                        <Text style={styles.selectTitle}>Select:</Text>
-                        {SELECTORS.map(selector => (
-                        <TouchableOpacity
-                            key={selector.title}
-                            onPress={() => this.setSections([selector.value])}
-                        >
-                            <View style={styles.selector}>
-                                <Text
-                                    style={
-                                        activeSections.includes(selector.value) &&
-                                        styles.activeSelector
-                                    }
-                                >
-                                    {selector.title}
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-                        ))}
-                    </View>
-                    <TouchableOpacity onPress={this.toggleExpanded}>
-                        <View style={styles.header}>
-                            <Text style={styles.headerText}>Single Collapsible</Text>
-                        </View>
-                    </TouchableOpacity>
-                    <Collapsible collapsed={this.state.collapsed} align="center">
-                        <View style={styles.content}>
-                            <Text>
-                                Bacon ipsum dolor amet chuck turducken landjaeger tongue spare
-                                ribs
-                            </Text>
-                        </View>
-                    </Collapsible>
+            <ScrollView style={{marginLeft: 20, marginRight: 20}}>
+                    <Text style={styles.title}>FAQ</Text>
                     <Accordion
                         activeSections={activeSections}
                         sections={CONTENT}
                         touchableComponent={TouchableOpacity}
-                        expandMultiple={multipleSelect}
+                        expandMultiple
                         renderHeader={this.renderHeader}
                         renderContent={this.renderContent}
                         duration={400}
                         onChange={this.setSections}
                     />
-                </ScrollView>
-            </View>
+            </ScrollView>
         );
     }
 }
 
 const styles = StyleSheet.create({
-    container: {
-    },
     title: {
         color: "#4C3DA8",
         fontWeight: 'bold',
         fontSize: 30,
         marginTop: 40,
-        marginBottom: 10
+        marginBottom: 32
     },
     header: {
-        backgroundColor: '#F5FCFF',
-        padding: 10,
+        marginBottom: 16
     },
     headerText: {
-        textAlign: 'center',
         fontSize: 16,
-        fontWeight: '500',
+        color: '#4C3DA8',
+        fontWeight: 'bold'
     },
     content: {
-        padding: 20,
-        backgroundColor: '#fff',
-    },
-    active: {
-        backgroundColor: 'rgba(255,255,255,1)',
-    },
-    inactive: {
-        backgroundColor: 'rgba(245,252,255,1)',
+        marginBottom: 16,
+        marginLeft: 16,
+        marginRight: 16
     },
     selectors: {
         marginBottom: 10,

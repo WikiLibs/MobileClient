@@ -27,7 +27,9 @@ export default class Account extends React.Component {
         updateUsername: '',
         updateProfileMessage: '',
         updatePassword: '',
-        updatePasswordOld: ''
+        updatePasswordOld: '',
+        forgetPasswordOn: false,
+        emailForgot: ''
     }
 
     componentDidMount = async () => {
@@ -201,6 +203,10 @@ export default class Account extends React.Component {
         this.setState({password: event});
     }
 
+    onEmailForgotChange = (event) => {
+        this.setState({emailForgot: event});
+    }
+
     onPressLogin = () => {
         this.api.connectUser(this.state)
             .then((Response) => {
@@ -218,6 +224,19 @@ export default class Account extends React.Component {
             email: '',
             password: '',
             isRegistering: true
+        })
+    }
+
+    onPressForgot = () => {
+        this.setState({
+            forgetPasswordOn: true
+        })
+    }
+
+    onPressForgotSend = () => {
+        this.setState({
+            forgetPasswordOn: false,
+            emailForgot: ''
         })
     }
 
@@ -255,7 +274,6 @@ export default class Account extends React.Component {
                 >
                     LOGIN
                 </Button>
-                <Text style={styles.note}>Note: signing in will redirect you to the homepage</Text>
                 <View style={styles.separatorBig}/>
                 <Text style={styles.title}>
                     Not a member yet ?
@@ -268,6 +286,41 @@ export default class Account extends React.Component {
                 >
                     REGISTER
                 </Button>
+                <View style={styles.separatorMedium}/>
+                <Text style={styles.title}>
+                    Forgot your password ?
+                </Text>
+                <View style={styles.separator}/>
+                {!this.state.forgetPasswordOn
+                    ? <Button
+                        mode="contained"
+                        onPress={this.onPressForgot}
+                        contentStyle={styles.buttonLogin}
+                    >
+                        SEND MAIL
+                    </Button>
+                    : <View>
+                        <TextInput
+                            label="Email"
+                            placeholder="Input email here"
+                            mode="outlined"
+                            autoCompleteType='email'
+                            selectionColor="#7B68EE"
+                            keyboardType='email-address'
+                            onChangeText={this.onEmailForgotChange}
+                            value={this.state.emailForgot}
+                        />
+                        <View style={styles.separator}/>
+                        <Button
+                            mode="contained"
+                            onPress={this.onPressForgotSend}
+                            contentStyle={styles.buttonLogin}
+                        >
+                            SEND
+                        </Button>
+                    </View>
+                }
+                
             </View>
         )
     }
@@ -472,8 +525,12 @@ const styles = StyleSheet.create({
         height: 8,
         opacity: 0
     },
+    separatorMedium: {
+        height: 32,
+        opacity: 0
+    },
     separatorBig: {
-        height: 128,
+        height: 100,
         opacity: 0
     },
     buttonLogin: {

@@ -14,17 +14,18 @@ export default function SearchContainer({ navigation }) {
             initialRouteName="Search"
             screenOptions={{
                 headerStyle: {
-                backgroundColor: '#7B68EE',
-            },
-            headerTintColor: '#fff',
-            headerLeft: () => (
-                <Icon 
-                    name="menu"
-                    size={25}
-                    style={{marginStart: 15}}
-                    color="#fff"
-                    onPress={() => navigation.openDrawer()}/>
-            )
+                    backgroundColor: '#7B68EE',
+                },
+                headerTintColor: '#fff',
+                headerLeft: () => (
+                    <Icon 
+                        name="menu"
+                        size={25}
+                        style={{marginStart: 15}}
+                        color="#fff"
+                        onPress={() => navigation.openDrawer()}
+                    />
+                )
             }}
         >
         <SearchStack.Screen
@@ -35,7 +36,10 @@ export default function SearchContainer({ navigation }) {
             name="SymbolPage"
             component={SymbolPage}
             options={{
-                title: "Symbol"
+                title: "Symbol",
+                headerLeft: () => (
+                    null
+                )
             }}
         />
     </SearchStack.Navigator>

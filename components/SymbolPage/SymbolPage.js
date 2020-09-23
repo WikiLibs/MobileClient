@@ -80,7 +80,6 @@ export default class SymbolPage extends React.Component {
 
     searchStringInParameters = (string, array) => {
         for (let i = 0; i < array.parameters.length; i++) {
-            console.log(array.parameters[i].prototype)
             if (array.parameters[i].prototype === string)
                 return true
         }
@@ -149,7 +148,77 @@ export default class SymbolPage extends React.Component {
                 )}
             </View>
         )
-    } 
+    }
+
+    getExample = (exampleTab) => {
+        let exampleString = ''
+        let indent = ''
+
+        for (let i = 0; i < exampleTab.length; i++) {
+            if (i !== 0)
+                exampleString += '\n'
+            if (exampleTab[i].data.includes('}'))
+                indent -= '   '
+            indent = indent === 0 ? '' : indent
+            exampleString += indent + exampleTab[i].data
+            if (exampleTab[i].data.includes('{'))
+                indent += '    '
+        }
+        return exampleString
+    }
+
+    renderExample = (example) => {
+        let list = [];
+        let comments = [];
+        return (
+            <View style={styles.exampleContainer}>
+                <Text style={styles.exampleDescription}>{example.description}</Text>
+                <View style={styles.separatorDescription}/>
+                <CodeBox
+                    code={this.getExample(example.code)}
+                />
+                <Text style={styles.exampleModification}>Last modification: {this.state.mapIdPseudo[example.userId]} {example.lastModificationDate}</Text>
+                <View style={styles.separatorCommentaries}/>
+                <Text style={styles.exampleCommentariesTitle}>Comments</Text>
+                {Object.keys(this.state.mapComments).length > 0
+                    ? this.state.mapComments[example.id].data.map((comment, index) =>
+                        <View>
+                            {index !== 0
+                                ? <View style={styles.separatorCommentariesIndividual}/>
+                                : null
+                            }
+                            <View style={styles.exampleCommentairesCommentaryContainer}>
+                                <Text style={styles.exampleCommentaries}>{comment.data}</Text>
+                                <Text style={styles.exampleCommentairesCommentary}>-   {this.state.mapIdPseudo[comment.userId]}</Text>
+                                <Text style={styles.exampleCommentairesCommentaryDate}>   {(new Date(comment.creationDate)).toLocaleDateString()}</Text>
+                            </View>
+                        </View>
+                    )
+                    : <Text>No comments yet.</Text>
+                }
+            </View>
+        )
+    }
+    
+    renderExamples = () => {
+        if (this.state.listExample.length === 0)
+            return (
+                <View>
+                    <Text style={styles.titles}>Examples</Text>
+                    <Text>No examples available yet. Come back later !</Text>
+                </View>
+            )
+        return (
+            <View>
+                <Text style={styles.titles}>Examples</Text>
+                {this.state.listExample.map((example, index) =>
+                    <View>
+                        {this.renderExample(example)}
+                    </View>
+                )}
+            </View>
+        )
+    }
 
     render () {
         return (
@@ -170,12 +239,8 @@ export default class SymbolPage extends React.Component {
                         }
                     </View>
                 )}
-                {/* <Text style={styles.titles}>Example</Text>
-                <Text style={styles.mainContent}>symbol.example.description</Text>
-                <View style={styles.separatorSmall} />
-                <CodeBox
-                    code="symbol.example.code"
-                /> */}
+                <View style={styles.separatorBig} />
+                {this.renderExamples()}
                 <View style={styles.separatorBig} />
             </ScrollView>
         )
@@ -238,7 +303,59 @@ const styles = StyleSheet.create({
     },
     separatorColor: {
         height: 1,
+        backgroundColor: '#cccccc',
+        margin: 16,
+        marginTop: 32
+    },
+    exampleContainer: {
+        borderColor: "#EBEBEB",
+        borderRadius: 5,
+        borderWidth: 2,
+        marginBottom: 8,
+        padding: 16
+    },
+    exampleDescription: {
+        marginBottom: 8
+    },
+    exampleModification: {
+        marginTop: 16,
+        fontStyle: 'italic',
+        fontSize: 12,
+        color: "#3E3E3E"
+    },
+    separatorDescription: {
+        height: 1,
         backgroundColor: '#EBEBEB',
-        margin: 16
+        marginBottom: 8
+    },
+    separatorCommentaries: {
+        height: 1,
+        backgroundColor: '#EBEBEB',
+        marginBottom: 8,
+        marginTop: 8
+    },
+    exampleCommentariesTitle: {
+        color: "#4C3DA8",
+        fontWeight: 'bold',
+        marginBottom: 8
+    },
+    exampleCommentaries: {
+        marginLeft: 8,
+        marginRight: 8
+    },
+    separatorCommentariesIndividual: {
+        height: 1,
+        backgroundColor: '#EBEBEB',
+        margin: 8
+    },
+    exampleCommentairesCommentaryContainer: {
+        display: 'flex',
+        flexDirection: 'row'
+    },
+    exampleCommentairesCommentary: {
+        color: "#4C3DA8"
+    },
+    exampleCommentairesCommentaryDate: {
+        color: "#3E3E3E"
     }
   })
