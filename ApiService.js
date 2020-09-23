@@ -1,8 +1,11 @@
 import Axios from "axios";
+import AsyncStorage from '@react-native-community/async-storage'
 
 export default class ApiService {
     url = "https://wikilibs-dev-api.azurewebsites.net/";
     apiKey = "5c2a6a60-c5b3-4df2-b0bf-5235fd495e8a";
+
+    userToken = null
 
     getDebug() {
         return (Axios.get(this.url + "/debug"));
@@ -84,7 +87,7 @@ export default class ApiService {
         },
             {
                 headers: {
-                    'Authorization': 'Bearer ' + localStorage.getItem('userToken')
+                    'Authorization': 'Bearer ' + this.token
                 }
             }));
     }
@@ -98,7 +101,7 @@ export default class ApiService {
         },
             {
                 headers: {
-                    'Authorization': 'Bearer ' + localStorage.getItem('userToken')
+                    'Authorization': 'Bearer ' + this.token
                 }
             }));
     }
@@ -131,7 +134,7 @@ export default class ApiService {
         },
             {
                 headers: {
-                    'Authorization': 'Bearer ' + localStorage.getItem('userToken')
+                    'Authorization': 'Bearer ' + this.token
                 }
             }));
     }
@@ -140,7 +143,7 @@ export default class ApiService {
         return (Axios.delete(this.url + "/example/comment/" + id,
             {
                 headers: {
-                    'Authorization': 'Bearer ' + localStorage.getItem('userToken')
+                    'Authorization': 'Bearer ' + this.token
                 }
             }));
     }
@@ -167,8 +170,7 @@ export default class ApiService {
     }
 
     disconnect() {
-        localStorage.removeItem('userToken');
-        window.location.pathname = "/";
+        AsyncStorage.removeItem('userToken');
     }
 
     getLibs(lang) {
@@ -215,8 +217,8 @@ export default class ApiService {
                 }
             })
             .then((Response) => {
-                localStorage.setItem('userToken', Response.data);
-                window.location.pathname = "/";
+                AsyncStorage.setItem('userToken', Response.data)
+                this.token=Response.data
             }));
     }
 
@@ -224,18 +226,18 @@ export default class ApiService {
         return (Axios.patch(this.url + "/auth/refresh", null,
             {
                 headers: {
-                    'Authorization': 'Bearer ' + localStorage.getItem('userToken')
+                    'Authorization': 'Bearer ' + this.token
                 }
             })
             .then((response) => {
-                localStorage.setItem('userToken', response.data);
+                AsyncStorage.setItem('userToken', response.data);
             }));
     }
 
     getMe() {
         return (Axios.get(this.url + "/user/me", {
             headers: {
-                'Authorization': 'Bearer ' + localStorage.getItem('userToken')
+                'Authorization': 'Bearer ' + this.token
             }
         }));
     }
@@ -259,7 +261,7 @@ export default class ApiService {
             },
                 {
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('userToken')
+                        'Authorization': 'Bearer ' + this.token
                     }
                 }));
         } else {
@@ -271,7 +273,7 @@ export default class ApiService {
             },
                 {
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('userToken')
+                        'Authorization': 'Bearer ' + this.token
                     }
                 }));
         }

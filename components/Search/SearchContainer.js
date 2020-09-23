@@ -4,7 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import Search from './Search'
-import SymbolPageContainer from '../SymbolPage/SymbolPageContainer'
+import SymbolPage from '../SymbolPage/SymbolPage'
 
 const SearchStack = createStackNavigator()
 
@@ -33,7 +33,7 @@ export default function SearchContainer({ navigation }) {
         />
         <SearchStack.Screen
             name="SymbolPage"
-            component={SymbolPageContainer}
+            component={SymbolPage}
             options={{
                 title: "Symbol"
             }}

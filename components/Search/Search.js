@@ -1,9 +1,9 @@
 import * as React from 'react'
-import { View, Text, StyleSheet, ScrollView, Button } from 'react-native'
+import { View, Text, StyleSheet, ScrollView, Button, TouchableOpacity } from 'react-native'
 import { Avatar, Card, Title, Paragraph } from 'react-native-paper'
 import { SearchBar } from 'react-native-elements'
 import ApiService from '../../ApiService'
-import { useQuery } from '../../Utils'
+import CustomButton from './../../tools/CustomButton'
 
 const LeftContent = props => <Avatar.Icon {...props} icon="folder" />
 
@@ -26,11 +26,10 @@ export default class Search extends React.Component {
         langFlag: -1,
         typeFlag: -1,
         search: "",
-        pageName: "Unknown"
+        pageName: "Unknown",
+        filterLanguage: "",
+        languages: []
     }
-
-    defaultOption = this.state.langsNames[0];
-    defaultValue = "Select a language";
 
     componentDidMount = async () => {
         await this.api.getLangLibTable().then(langs => {
@@ -45,28 +44,9 @@ export default class Search extends React.Component {
             this.setState({ langs: langs, libMap: map, langsNames: tab });
         });
         await this.api.getSymTypes().then(types => this.setState({ types: types }));
-        this.refreshData();
-    }
-
-    initDropdown = ({ value }) => {
-        if (value === "All") {
-            this.setState({ langFlag: -1 });
-            this.defaultValue = "All"
-            this.setState({ symbols: {}, 'page': 1 }, () => this.refreshData());
-        } else {
-            this.state.langs.forEach(elem => {
-                if (value === elem.displayName) {
-                    this.setState({ langFlag: elem.id });
-                    this.defaultValue = elem.displayName;
-                    this.setState({ symbols: {}, 'page': 1 }, () => this.refreshData());
-                }
-            });
-        }
     }
 
     refreshData = () => {
-        var q = useQuery();
-        console.log("hey " + this.state.search)
         let query = {
             page: this.state.page,
             count: 10,
@@ -74,17 +54,10 @@ export default class Search extends React.Component {
             lang: this.state.langFlag === -1 ? null : this.state.langFlag,
             type: this.state.typeFlag === -1 ? null : this.state.typeFlag,
             path: this.state.search
-        };
-        if (q.lib) {
-            this.setState({ search: null, pageName: q.name });
-            query.lib = parseInt(q.lib);
-        } else if (q.path) {
-            this.setState({ search: q.path, pageName: q.path });
-            query.path = q.path;
         }
         this.api.searchSymbols(query).then(response => {
             this.sortResultsIntoList(response.data);
-        });
+        })
     }
 
     handleNext = () => {
@@ -104,73 +77,47 @@ export default class Search extends React.Component {
                 symbolsState[sym.typeName] = []
             symbolsState[sym.typeName].push(sym)
         })
-
         this.setState({
             symbols: symbolsState,
             hasMorePages: data.hasMorePages
         })
     }
 
-    renderFooterOld = () => {
-        if (Object.keys(this.state.symbols).length === 0 || (!this.state.hasMorePages && this.state.page === 1))
-            return;
-        if (!this.state.hasMorePages && this.state.page > 1)
-            return (
-                <Button variant="contained" className="search-page-previous" onClick={this.handlePrev} classes={{ root: 'button-style', label: 'button-style' }}>
-                    Previous page
-                </Button>
-            )
-        if (this.state.page > 1)
-            return (
-                <div>
-                    <Button variant="contained" className="search-page-previous" onClick={this.handlePrev} classes={{ root: 'button-style', label: 'button-style' }}>
-                        Previous page
-                    </Button>
-                    <Button variant="contained" className="search-page-next" onClick={this.handleNext} classes={{ root: 'button-style', label: 'button-style' }}>
-                        Next page
-                    </Button>
-                </div>
-            )
-        else
-            return (
-                <Button variant="contained" className="search-page-next" onClick={this.handleNext} classes={{ root: 'button-style', label: 'button-style' }}>
-                    Next page
-                </Button>
-            )
+    getLanguages = () => {
+        let tab = []
+        this.state.langs.forEach(elem => {
+            tab += {label: elem.displayName, value: elem.id}
+        })
+        this.setState({languages: tab})
     }
 
     renderFooter = () => {
-        console.log('yee')
-        if (Object.keys(this.state.symbols).length === 0 || (!this.state.hasMorePages && this.state.page === 1)) {
-            console.log('exit')
-            return
+        const isPrevEnabled = () => {
+            if (this.state.page > 1 && this.state.search.length > 0)
+                return true
+            return false
         }
-        console.log(!this.state.hasMorePages && this.state.page)
-        if (!this.state.hasMorePages && this.state.page > 1)
-            return (
-                <Button variant="contained" className="search-page-previous" onClick={this.handlePrev} classes={{ root: 'button-style', label: 'button-style' }}>
-                    Previous page
-                </Button>
-            )
-        console.log(this.state.page)
-        if (this.state.page > 1)
-            return (
-                <div>
-                    <Button variant="contained" className="search-page-previous" onClick={this.handlePrev} classes={{ root: 'button-style', label: 'button-style' }}>
-                        Previous page
-                    </Button>
-                    <Button variant="contained" className="search-page-next" onClick={this.handleNext} classes={{ root: 'button-style', label: 'button-style' }}>
-                        Next page
-                    </Button>
-                </div>
-            )
-        else
-            return (
-                <Button title="Learn More" />
-                /* <Button variant="contained" className="search-page-next" onClick={this.handleNext} classes={{ root: 'button-style', label: 'button-style' }}>
-                    Next page
-                </Button> */
-            )
+
+        const isNextEnabled = () => {
+            if (this.state.hasMorePages && this.state.search.length > 0)
+                return true
+            return false
+        }
+
+        return (
+            <View style={styles.footerContainer}>
+                <CustomButton 
+                    title="Prev" 
+                    onClick={this.handlePrev} 
+                    isEnabled={isPrevEnabled()}
+                    icon="chevron-left" />
+                <CustomButton 
+                    title="Next" 
+                    onClick={this.handleNext} 
+                    isEnabled={isNextEnabled()}
+                    icon="chevron-right" />
+            </View>
+        )
     }
 
     getDisplayPath(sym) {
@@ -178,96 +125,71 @@ export default class Search extends React.Component {
         return (sym.langName + '/' + upPath);
     }
 
-    renderSymbolListOld = () => {
-        return (
-            <div>
-                {
-                    Object.keys(this.state.symbols).map((key) =>
-                        <div key={this.state.key + key} className='search-page-results-container'>
-                            <div className='search-page-title'>
-                                {key[0].toUpperCase() + key.slice(1)}
-                                <span className='search-page-title-number'>{this.state.symbols[key].length} result(s)</span>
-                            </div>
-                            {
-                                this.state.symbols[key].map((symbol) =>
-                                    <a className='search-page-result-container override-a' key={symbol.id} href={'/symbol?id=' + symbol.id}>
-                                        
-                                            <div className='search-page-result-title'>
-                                                {this.getDisplayPath(symbol)}
-                                            </div>
-                                        {/* <div className='search-page-card-title'>
-                                            <div className='search-page-preview-symbol'>
-                                                
-                                            </div>
-                                        </div> */}
-                                        <div className='search-page-result-description'>
-                                            Description unavailable yet.
-                                        </div>
-                                        <div className='search-page-separator' />
-                                        <div className='search-page-result-bottom-container'>
-                                            <div>Last update : {(new Date(symbol.lastModificationDate)).toLocaleDateString()} (by: {symbol.userName})</div>
-                                            <div>Viewed {symbol.views} times(s)</div>
-                                        </div>
-                                    </a>
-                                )
-                            }
-                        </div>
-                    )
-                }
-            </div>
-        )
+    getSymbolName = (symbolFullPath) => {
+        let symbolName = symbolFullPath
+
+        symbolName = symbolName.substring(symbolName.lastIndexOf("/") + 1, symbolName.length);
+
+        return symbolName
+    }
+
+    getSymbolPath = (symbolFullPath) => {
+        let symbolName = symbolFullPath
+
+        symbolName = symbolName.substring(0, symbolName.lastIndexOf("/"));
+
+        return symbolName
+    }
+
+    onClickCard = (symbolId) => () => {
+        this.props.navigation.navigate("SymbolPage", {
+            params: {
+                symbolId: symbolId
+            }
+        })
     }
 
     renderSymbolList = () => {
         return (
-            <div>
-                {
-                    Object.keys(this.state.symbols).map((key) =>
-                        <div key={this.state.key + key} className='search-page-results-container'>
-                            <div className='search-page-title'>
-                                {key[0].toUpperCase() + key.slice(1)}
-                                <span className='search-page-title-number'>{this.state.symbols[key].length} result(s)</span>
-                            </div>
-                            {
-                                this.state.symbols[key].map((symbol) =>
-                                    <a className='search-page-result-container override-a' key={symbol.id} href={'/symbol?id=' + symbol.id}>
-                                        
-                                            <div className='search-page-result-title'>
-                                                {this.getDisplayPath(symbol)}
-                                            </div>
-                                        {/* <div className='search-page-card-title'>
-                                            <div className='search-page-preview-symbol'>
-                                                
-                                            </div>
-                                        </div> */}
-                                        <div className='search-page-result-description'>
-                                            Description unavailable yet.
-                                        </div>
-                                        <div className='search-page-separator' />
-                                        <div className='search-page-result-bottom-container'>
-                                            <div>Last update : {(new Date(symbol.lastModificationDate)).toLocaleDateString()} (by: {symbol.userName})</div>
-                                            <div>Viewed {symbol.views} times(s)</div>
-                                        </div>
-                                    </a>
-                                )
-                            }
-                        </div>
-                    )
-                }
-            </div>
+            <View style={styles.symbolListContainer}>
+                {Object.keys(this.state.symbols).map((key) =>
+                    <View>
+                        <View style={styles.symbolTypeTitleContainer}>
+                            <Text style={styles.symbolTypeTitle}>{key[0].toUpperCase() + key.slice(1)}</Text>
+                            <Text style={styles.symbolTypeSubtitle}>{this.state.symbols[key].length} result(s)</Text>
+                        </View>
+                        {this.state.symbols[key].map((symbol) =>
+                            <TouchableOpacity onPress={this.onClickCard(symbol.id)}>
+                                <Card style={styles.cardContainer}>
+                                    <Card.Title title={this.getSymbolName(this.getDisplayPath(symbol))} subtitle={this.getSymbolPath(this.getDisplayPath(symbol))} /*left={LeftContent}*/ />
+                                    <Card.Content>
+                                        <Paragraph>Description unavailable yet.</Paragraph>
+                                    </Card.Content>
+                                    <View style={styles.separator}></View>
+                                    <Card.Content>
+                                        <Paragraph>Last update : {(new Date(symbol.lastModificationDate)).toLocaleDateString()} (by: {symbol.userName})</Paragraph>
+                                    </Card.Content>
+                                </Card>
+                            </TouchableOpacity>
+                        )}
+                    </View>
+                )}
+            </View>
         )
     }
 
     updateSearch = (search) => {
-        this.setState({ search: search, symbols: {}})
-        this.refreshData()
+        this.setState({ search: search, symbols: {}}, () => {
+            if (search.length > 0)
+                this.refreshData()
+            else
+                this.setState({hasMorePages: false})
+        })
     }
 
     render = () => {
-        console.log("p " + this.state.hasMorePages)
-        console.log("pa " + this.state.page)
         return (
-            <View>
+            <ScrollView>
                 <SearchBar
                     inputStyle={styles.searchBarInput}
                     inputContainerStyle={styles.searchBarInputContainer}
@@ -281,49 +203,15 @@ export default class Search extends React.Component {
                         ? <Text style={styles.resultsName}>Results for : {this.state.search}</Text>
                         : null
                     }
-                    <Text>{(!this.state.hasMorePages && this.state.page).toString()}</Text>
-                    <Text>{(Object.keys(this.state.symbols).length === 0 || (!this.state.hasMorePages && this.state.page === 1)).toString()}</Text>
-                    <Text>{this.state.page.toString()}</Text>
-                    <Text>{this.state.hasMorePages.toString()}</Text>
-                    <Text>Search : '{this.state.search}'</Text>
-                    <Text>OK {this.state.symbols.length}</Text>
-                    {this.renderFooter()}
+                    {this.renderSymbolList()}
+                    {this.state.search.length > 0
+                        ? this.renderFooter()
+                        : null
+                    }
                 </View>
-            </View>
-            /* <div className='search-page-container'>
-                
-                <div className='search-page-title'>
-                    
-                    Results for : '{useQuery().lib ? useQuery().name : useQuery().path}'
-                    <Dropdown className="search-page-dropdown" options={this.state.langsNames} onChange={this.initDropdown} value={this.defaultOption} placeholder={this.defaultValue} />
-                </div>
-                {this.renderSymbolList()}
-                {this.renderFooter()}
-            </div> */
-        )
-    }
-
-    /*onClickCard = () => {
-        props.navigation.navigate("SymbolPage")
-    }
-
-    render() {
-        return (
-            <ScrollView style={{marginLeft: 20, marginRight: 20}}>
-                <Text style={styles.titles}>Search</Text>
-                <Card onClick={this.onClickCard}>
-                    <Card.Title title="symbol_name" subtitle="library_name" left={LeftContent} />
-                    <Card.Content>
-                        <Paragraph>symbol_description_long</Paragraph>
-                    </Card.Content>
-                    <View style={styles.separator}></View>
-                    <Card.Content>
-                        <Paragraph>Last update : dd/mm/yyyy (by: user)</Paragraph>
-                    </Card.Content>
-                </Card>
             </ScrollView>
         )
-    }*/
+    }
 }
 
 const styles = StyleSheet.create({
@@ -343,46 +231,55 @@ const styles = StyleSheet.create({
         borderTopWidth: 0
     },
     resultsContainer: {
-        marginLeft: 16
+        marginLeft: 16,
+        marginRight: 16,
+        marginBottom: 32
     },
     resultsName: {
         color: "#3E3E3E",
+        fontStyle: "italic",
+        marginBottom: 16
+    },
+    footerContainer: {
+        marginTop: 16,
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between"
+    },
+    symbolListContainer: {
+    },
+    symbolTypeTitleContainer: {
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 16
+    },
+    symbolTypeTitle: {
+        color: "#4C3DA8",
+        fontWeight: "bold",
+        fontSize: 21,
+        marginRight: 16
+    },
+    symbolTypeSubtitle: {
+        color: "#3E3E3E",
         fontStyle: "italic"
     },
-
-
-    updated: {
-      fontStyle: "italic",
-      color: "#3E3E3E",
-      marginBottom: 20
+    cardContainer: {
+        marginBottom: 16
     },
-    titles: {
-      color: "#4C3DA8",
-      fontWeight: 'bold',
-      fontSize: 30,
-      marginTop: 40,
-      marginBottom: 10
+    filterContainer: {
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center"
     },
-    mainContent: {
-        marginLeft: 20,
-        marginRight: 20
+    filterLabel: {
+        marginRight: 16
     },
-    mainContentLink: {
-        marginLeft: 20,
-        marginRight: 20,
-        fontStyle: "italic",
-        color: '#4C3DA8'
-    },
-    subContent: {
-      color: "#4C3DA8",
-      fontWeight: 'bold',
-      fontSize: 16,
-      marginBottom: 10,
-      marginTop: 10
-    },
-    separator: {
-        height: 1,
-        backgroundColor: '#EBEBEB',
-        margin: 16
+    filterSelect: {
+        backgroundColor: 'white',
+        borderRadius: 5,
+        borderColor: "#7B68EE",
+        borderWidth: 1,
+        paddingLeft: 10
     }
   })

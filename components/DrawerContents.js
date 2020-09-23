@@ -22,12 +22,24 @@ export default function DrawerContents (props) {
         <View style={{flex: 1}}>
             <DrawerContentScrollView {...props}>
                 <DrawerItem
+                    label="Account"
+                    onPress={() => props.navigation.navigate("Account")}
+                    icon={({color, size}) => (
+                        <Icon 
+                        name="account-circle-outline" 
+                        color="#4C3DA8"
+                        size={size}
+                        />
+                    )}
+                />
+                <View style={styles.separator}/>
+                <DrawerItem
                     label="Home"
                     onPress={() => props.navigation.navigate("Home")}
                     icon={({color, size}) => (
                         <Icon 
-                        name="home" 
-                        color={color}
+                        name="home-outline" 
+                        color="#4C3DA8"
                         size={size}
                         />
                     )}
@@ -38,7 +50,7 @@ export default function DrawerContents (props) {
                     icon={({color, size}) => (
                         <Icon 
                         name="magnify" 
-                        color={color}
+                        color="#4C3DA8"
                         size={size}
                         />
                     )}
@@ -51,7 +63,7 @@ export default function DrawerContents (props) {
                     icon={({color, size}) => (
                         <Icon 
                         name="at" 
-                        color={color}
+                        color="#4C3DA8"
                         size={size}
                         />
                     )}
@@ -62,7 +74,7 @@ export default function DrawerContents (props) {
                     icon={({color, size}) => (
                         <Icon 
                         name="help-circle-outline" 
-                        color={color}
+                        color="#4C3DA8"
                         size={size}
                         />
                     )}
@@ -73,7 +85,7 @@ export default function DrawerContents (props) {
                     icon={({color, size}) => (
                         <Icon 
                         name="ballot-outline" 
-                        color={color}
+                        color="#4C3DA8"
                         size={size}
                         />
                     )}
@@ -84,7 +96,7 @@ export default function DrawerContents (props) {
                     icon={({color, size}) => (
                         <Icon 
                         name="ballot-outline" 
-                        color={color}
+                        color="#4C3DA8"
                         size={size}
                         />
                     )}
@@ -93,3 +105,11 @@ export default function DrawerContents (props) {
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    separator: {
+        height: 2,
+        backgroundColor: '#EBEBEB',
+        margin: 10
+    }
+})

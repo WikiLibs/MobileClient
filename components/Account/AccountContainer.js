@@ -3,14 +3,14 @@ import { Text, View, Button } from 'react-native'
 import { createStackNavigator } from '@react-navigation/stack'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
-import SymbolPage from './SymbolPage'
+import Account from './Account'
 
-const SymbolPageStack = createStackNavigator()
+const AccountStack = createStackNavigator()
 
-export default function SymbolPageContainer({ navigation }) {
+export default function AccountContainer({ navigation }) {
     return (
-        <SymbolPageStack.Navigator
-            initialRouteName="SymbolPage"
+        <AccountStack.Navigator
+            initialRouteName="Account"
             screenOptions={{
                 headerStyle: {
                 backgroundColor: '#7B68EE',
@@ -26,10 +26,10 @@ export default function SymbolPageContainer({ navigation }) {
             )
             }}
         >
-        <SymbolPageStack.Screen
-            name="SymbolPage"
-            component={SymbolPage}
+        <AccountStack.Screen
+            name="Account"
+            component={Account}
         />
-    </SymbolPageStack.Navigator>
+    </AccountStack.Navigator>
   )
 }

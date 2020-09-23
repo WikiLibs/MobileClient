@@ -9,9 +9,7 @@ const checkForm = ({ formErrors }) => {
 };
 
 function useQuery() {
-    console.log("yoooooo " + window.location.search)
     let obj = new URLSearchParams(window.location.search);
-    console.log('useQuery')
     let res = {}
     for (const [key, value] of obj) {
         res[key] = value;

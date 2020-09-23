@@ -2,34 +2,184 @@ import * as React from 'react'
 import { View, Text, StyleSheet, ScrollView } from 'react-native'
 import { Avatar, Button, Card, Title, Paragraph } from 'react-native-paper'
 import CodeBox from './../../tools/CodeBox'
+import ApiService from '../../ApiService'
 
-export default function SymbolPage(props) {
-    return (
-        <ScrollView style={{marginLeft: 20, marginRight: 20}}>
-            <Text style={styles.titles}>symbol_type - symbol_name</Text>
-            <Text style={styles.subtitle}>library_name</Text>
-            <Text style={styles.subtitle}>Last updated: last_modification_date</Text>
-            <Text style={styles.titles}>Prototype</Text>
-            <CodeBox 
-                code="symbol.prototype"
-            />
-            <Text style={styles.titles}>Description</Text>
-            <Text style={styles.mainContent}>symbol.description</Text>
-            <Text style={styles.titles}>Parameters</Text>
-            <Text style={styles.parameter}>parameter_1</Text>
-            <Text style={styles.parameterDescription}>parameter_1.description</Text>
-            <View style={styles.separator} />
-            <Text style={styles.parameter}>parameter_2</Text>
-            <Text style={styles.parameterDescription}>parameter_2.description</Text>
-            <Text style={styles.titles}>Example</Text>
-            <Text style={styles.mainContent}>symbol.example.description</Text>
-            <View style={styles.separatorSmall} />
-            <CodeBox
-                code="symbol.example.code"
-            />
-            <View style={styles.separatorBig} />
-        </ScrollView>
-    );
+export default class SymbolPage extends React.Component {
+    api = new ApiService();
+
+    state = {
+        userId: null,
+        date: null,
+        lang: null,
+        type: null,
+        path: null,
+        prototypes: [],
+        symbols: [],
+        code: "Write an example...", 
+        description: "", 
+        message: "" ,
+        listExample: [],
+        symbolId: 0,
+        pseudoExample: "",
+        mapIdPseudo: {},
+        mapComments: {},
+        comment: {},
+        exampleId: 0,
+        commentId: 0
+    }
+
+    componentDidMount = async () => {
+        let symbolId = this.props.route.params.params.symbolId
+        let listExample = await this.api.getExamples(symbolId)
+        this.setState({symbolId: symbolId});
+
+        let mapIdPseudo = {};
+        let mapComments = {};
+        let comments = {};
+        listExample.data.forEach(elem => {
+            this.api.getUser(elem.userId).then(response => {mapIdPseudo[elem.userId] = response.data.pseudo});
+            this.api.getComments(elem.id, 1).then(response => {mapComments[elem.id] = response.data});
+            comments[elem.id] = "";
+        })
+
+        this.setState({mapIdPseudo: mapIdPseudo});
+        this.setState({listExample: listExample.data});
+        this.setState({mapComments: mapComments});
+        this.setState({comment: comments});
+
+        this.api.getSymbolById(symbolId).then(response => { this.setState(response.data); });
+    }
+
+    getSymbolType = () => {
+        if (this.state.type)
+            return this.state.type.displayName
+        return ""
+    }
+    
+    getSymbolName = () => {
+        var path = this.state.path;
+        if (path) {
+            var arr = path.split('/');
+            if (arr.length <= 0)
+                return (null)
+            return (arr[arr.length - 1])
+        }
+        return (null)
+    }
+
+    getSymbolLib = () => {
+        var path = this.state.path;
+        if (path) {
+            var arr = path.split('/');
+            if (arr.length < 2)
+                return (null)
+            return (arr[1])
+        }
+        return (null)
+    }
+
+    searchStringInParameters = (string, array) => {
+        for (let i = 0; i < array.parameters.length; i++) {
+            console.log(array.parameters[i].prototype)
+            if (array.parameters[i].prototype === string)
+                return true
+        }
+        return false
+    }
+
+    renderPrototype = (prototype) => {
+        return (
+            <View>
+                <Text style={styles.titles}>Prototype</Text>
+                <CodeBox 
+                    code={prototype.prototype}
+                />
+            </View>
+        )
+    }
+
+    renderDescription = (prototype) => {
+        if (!prototype.description)
+            return null
+        return (
+            <View>
+                <Text style={styles.titles}>Description</Text>
+                <Text style={styles.mainContent}>{prototype.description}</Text>
+            </View>
+        )
+    }
+
+    renderParameters = (prototype) => {
+        if ((!this.searchStringInParameters('return', prototype) && prototype.parameters.length === 0) || prototype.parameters[0].prototype === 'return')
+            return null
+        return (
+            <View>
+                <Text style={styles.titles}>Parameter(s)</Text>
+                {prototype.parameters.map((parameter, index) =>
+                    <View>
+                        {parameter.prototype !== 'return'
+                            ? <View>
+                                <Text style={styles.parameter}>{parameter.prototype}</Text>
+                                <Text style={styles.parameterDescription}>{parameter.description}</Text>
+                            </View>
+                            : null
+                        }
+                    </View>
+                )}
+            </View>
+        )
+    }
+
+    renderReturns = (prototype) => {
+        if (!this.searchStringInParameters('return', prototype))
+            return null
+        return (
+            <View>
+                <Text style={styles.titles}>Return value(s)</Text>
+                {prototype.parameters.map((parameter, index) =>
+                    <View>
+                        {parameter.prototype === 'return'
+                            ? <View>
+                                <Text style={styles.parameter}>{parameter.prototype}</Text>
+                                <Text style={styles.parameterDescription}>{parameter.description}</Text>
+                            </View>
+                            : null
+                        }
+                    </View>
+                )}
+            </View>
+        )
+    } 
+
+    render () {
+        return (
+            <ScrollView style={{marginLeft: 20, marginRight: 20}}>
+                <Text style={styles.titles}>{this.getSymbolType()} | {this.getSymbolName()}</Text>
+                <Text style={styles.subtitle}>{this.getSymbolLib()}</Text>
+                <Text style={styles.subtitle}>Last updated: {this.state.lastModificationDate}</Text>
+
+                {this.state.prototypes.map((prototype, index) =>
+                    <View>
+                        {this.renderPrototype(prototype)}
+                        {this.renderDescription(prototype)}
+                        {this.renderParameters(prototype)}
+                        {this.renderReturns(prototype)}
+                        {(index !== (this.state.prototypes.length - 1))
+                            ? <View style={styles.separatorColor}/>
+                            : null
+                        }
+                    </View>
+                )}
+                {/* <Text style={styles.titles}>Example</Text>
+                <Text style={styles.mainContent}>symbol.example.description</Text>
+                <View style={styles.separatorSmall} />
+                <CodeBox
+                    code="symbol.example.code"
+                /> */}
+                <View style={styles.separatorBig} />
+            </ScrollView>
+        )
+    }
 }
 
 const styles = StyleSheet.create({
@@ -86,7 +236,7 @@ const styles = StyleSheet.create({
       marginBottom: 10,
       marginTop: 10
     },
-    separator: {
+    separatorColor: {
         height: 1,
         backgroundColor: '#EBEBEB',
         margin: 16
