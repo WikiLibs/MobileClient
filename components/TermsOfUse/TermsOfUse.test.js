@@ -1,10 +1,11 @@
 import 'react-native';
 import React from 'react';
-import Home from './Home';
+import TermsOfUse from './TermsOfUse';
 
 // Note: test renderer must be required after react-native.
 import renderer from 'react-test-renderer';
 
+
 it('renders correctly', () => {
-  expect(renderer.create(<Home />)).toMatchSnapshot();
+  expect(renderer.create(<TermsOfUse />)).toMatchSnapshot();
 });
