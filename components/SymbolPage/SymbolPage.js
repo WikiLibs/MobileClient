@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { View, Text, StyleSheet, ScrollView } from 'react-native'
 import { Button, IconButton, TextInput } from 'react-native-paper'
+import { cos } from 'react-native-reanimated'
 import CodeBox from './../../tools/CodeBox'
 import showToast from './../../tools/Toast'
 
@@ -37,9 +38,16 @@ export default class SymbolPage extends React.Component {
         let comments = {};
         listExample.data.forEach(elem => {
             global.api.getUser(elem.userId).then(response => {mapIdPseudo[elem.userId] = response.data.pseudo});
-            global.api.getComments(elem.id, 1).then(response => {mapComments[elem.id] = response.data});
+            global.api.getComments(elem.id, 1).then(response => {
+                mapComments[elem.id] = response.data
+                response.data.data.map(comment => {
+                    global.api.getUser(comment.userId).then(response => {mapIdPseudo[comment.userId] = response.data.pseudo})
+                })
+            });
             comments[elem.id] = "";
         })
+
+        //console.log(listExample)
 
         this.setState({mapIdPseudo: mapIdPseudo});
         this.setState({listExample: listExample.data});
@@ -187,6 +195,31 @@ export default class SymbolPage extends React.Component {
             });
     }
 
+    renderComments = (exampleId) => {
+        if (!this.state.mapComments[exampleId])
+            return
+        return (
+            <View>
+                {this.state.mapComments[exampleId].data.length > 0
+                ? this.state.mapComments[exampleId].data.map((comment, index) =>
+                    <View>
+                        {index !== 0
+                            ? <View style={styles.separatorCommentariesIndividual}/>
+                            : null
+                        }
+                        <View style={styles.exampleCommentairesCommentaryContainer}>
+                            <Text style={styles.exampleCommentaries}>{comment.data}</Text>
+                            <Text style={styles.exampleCommentairesCommentary}>-   {this.state.mapIdPseudo[comment.userId]}</Text>
+                            <Text style={styles.exampleCommentairesCommentaryDate}>   {(new Date(comment.creationDate)).toLocaleDateString()}</Text>
+                        </View>
+                    </View>
+                )
+                : <Text>No comments yet.</Text>
+                }
+            </View>
+        )
+    }
+
     renderExample = (example) => {
         return (
             <View style={styles.exampleContainer}>
@@ -195,25 +228,10 @@ export default class SymbolPage extends React.Component {
                 <CodeBox
                     code={this.getExample(example.code)}
                 />
-                <Text style={styles.exampleModification}>Last modification: {this.state.mapIdPseudo[example.userId]} {example.lastModificationDate}</Text>
+                <Text style={styles.exampleModification}>Last modification: {this.state.mapIdPseudo[example.userId]} {(new Date(example.lastModificationDate)).toLocaleDateString()}</Text>
                 <View style={styles.separatorCommentaries}/>
                 <Text style={styles.exampleCommentariesTitle}>Comments</Text>
-                {Object.keys(this.state.mapComments).length > 0
-                    ? this.state.mapComments[example.id].data.map((comment, index) =>
-                        <View>
-                            {index !== 0
-                                ? <View style={styles.separatorCommentariesIndividual}/>
-                                : null
-                            }
-                            <View style={styles.exampleCommentairesCommentaryContainer}>
-                                <Text style={styles.exampleCommentaries}>{comment.data}</Text>
-                                <Text style={styles.exampleCommentairesCommentary}>-   {this.state.mapIdPseudo[comment.userId]}</Text>
-                                <Text style={styles.exampleCommentairesCommentaryDate}>   {(new Date(comment.creationDate)).toLocaleDateString()}</Text>
-                            </View>
-                        </View>
-                    )
-                    : <Text>No comments yet.</Text>
-                }
+                {this.renderComments(example.id)}
                 <View style={styles.separatorCommentaries}/>
                 {global.api.token
                     ? <View style={styles.inputComment}>
@@ -280,7 +298,7 @@ export default class SymbolPage extends React.Component {
                         <Text style={styles.topTitle}>{this.getSymbolName()}</Text>
                         <View style={styles.separator}/>
                         <Text style={styles.subtitle}>{this.getSymbolLib()}</Text>
-                        <Text style={styles.subtitle}>Last updated: {this.state.lastModificationDate}</Text>
+                        <Text style={styles.subtitle}>Last updated: {(new Date(this.state.lastModificationDate)).toLocaleDateString()}</Text>
                     </View>
                 </View>
                 <View style={{marginLeft: 20, marginRight: 20}}>
@@ -424,7 +442,8 @@ const styles = StyleSheet.create({
     },
     exampleCommentairesCommentaryContainer: {
         display: 'flex',
-        flexDirection: 'row'
+        flexDirection: 'row',
+        flexWrap: 'wrap'
     },
     exampleCommentairesCommentary: {
         color: "#4C3DA8"
