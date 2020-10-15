@@ -3,10 +3,8 @@ import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native'
 import { Button, Switch, TextInput } from 'react-native-paper'
 import ApiService from '../../ApiService'
 import showToast from './../../tools/Toast'
-import AsyncStorage from '@react-native-community/async-storage'
 
 export default class Account extends React.Component {
-    api = new ApiService();
 
     state = {
         isConnected: false,
@@ -33,10 +31,10 @@ export default class Account extends React.Component {
     }
 
     componentDidMount = async () => {
-        let token = this.api.token
+        let token = global.api.token
         if (token) {
             this.setState({isConnected: true})
-            this.api.getMe()
+            global.api.getMe()
                 .then((Response) =>{
                     this.setState({user: Response.data})
                 })
@@ -64,7 +62,7 @@ export default class Account extends React.Component {
                 newPassword: this.state.updatePassword,
                 password: this.state.updatePasswordOld
             }
-            this.api.patchMe(state)
+            global.api.patchMe(state)
                 .then((Response) => {
                     this.setState({
                         isUpdating: false,
@@ -73,12 +71,12 @@ export default class Account extends React.Component {
                         updatePassword: '',
                         updatePasswordOld: ''
                     })
-                    this.api.getMe().then((Response) =>{
+                    global.api.getMe().then((Response) =>{
                         this.setState({user: Response.data})
                     })
                 })
                 .catch(error => {
-                    this.setState({ apiError: this.api.translateErrorMessage(error) });
+                    this.setState({ apiError: global.api.translateErrorMessage(error) });
                 });
         }
     }
@@ -208,12 +206,12 @@ export default class Account extends React.Component {
     }
 
     onPressLogin = () => {
-        this.api.connectUser(this.state)
+        global.api.connectUser(this.state)
             .then((Response) => {
                 if (Platform.OS === 'android')
                     showToast("Successfuly signed in")
                 this.setState({isConnected: true})
-                this.api.getMe().then((Response) =>{
+                global.api.getMe().then((Response) =>{
                     this.setState({user: Response.data})
                 })
             })
@@ -372,12 +370,12 @@ export default class Account extends React.Component {
             pseudo: this.state.registerUsername,
             password: this.state.registerPassword,
         }
-        this.api.createUser(state)
+        global.api.createUser(state)
             .then((Response) => {
                 this.setState({ message: "Successfully created account, please check your email.", error: false });
             })
             .catch((error) => {
-                this.setState({ message: this.api.translateErrorMessage(error), error: true });
+                this.setState({ message: global.api.translateErrorMessage(error), error: true });
             })
     }
 

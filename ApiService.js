@@ -1,11 +1,9 @@
 import Axios from "axios";
-import AsyncStorage from '@react-native-community/async-storage'
 
 export default class ApiService {
-    url = "https://wikilibs-dev-api.azurewebsites.net/";
+    url = "https://wikilibs-dev-api.azurewebsites.net";
     apiKey = "5c2a6a60-c5b3-4df2-b0bf-5235fd495e8a";
-
-    token = null
+    token = null;
 
     getDebug() {
         return (Axios.get(this.url + "/debug"));
@@ -170,7 +168,7 @@ export default class ApiService {
     }
 
     disconnect() {
-        AsyncStorage.removeItem('userToken');
+        this.token = null
     }
 
     getLibs(lang) {
@@ -216,9 +214,8 @@ export default class ApiService {
                     'Authorization': this.apiKey
                 }
             })
-            .then((Response) => {
-                AsyncStorage.setItem('userToken', Response.data)
-                this.token=Response.data
+            .then((response) => {
+                this.token=response.data
             }));
     }
 
@@ -236,7 +233,7 @@ export default class ApiService {
                 }
             })
             .then((response) => {
-                AsyncStorage.setItem('userToken', response.data);
+                this.token=response.data
             }));
     }
 

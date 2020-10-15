@@ -2,13 +2,11 @@ import * as React from 'react'
 import { View, Text, StyleSheet, ScrollView, Button, TouchableOpacity } from 'react-native'
 import { Avatar, Card, Title, Paragraph } from 'react-native-paper'
 import { SearchBar } from 'react-native-elements'
-import ApiService from '../../ApiService'
 import CustomButton from './../../tools/CustomButton'
 
 const LeftContent = props => <Avatar.Icon {...props} icon="folder" />
 
 export default class Search extends React.Component {
-    api = new ApiService();
 
     state = {
         data: null,
@@ -32,7 +30,7 @@ export default class Search extends React.Component {
     }
 
     componentDidMount = async () => {
-        await this.api.getLangLibTable().then(langs => {
+        await global.api.getLangLibTable().then(langs => {
             let map = {};
             let tab = [];
             tab[0] = "All";
@@ -43,7 +41,7 @@ export default class Search extends React.Component {
             });
             this.setState({ langs: langs, libMap: map, langsNames: tab });
         });
-        await this.api.getSymTypes().then(types => this.setState({ types: types }));
+        await global.api.getSymTypes().then(types => this.setState({ types: types }));
     }
 
     refreshData = () => {
@@ -55,7 +53,7 @@ export default class Search extends React.Component {
             type: this.state.typeFlag === -1 ? null : this.state.typeFlag,
             path: this.state.search
         }
-        this.api.searchSymbols(query).then(response => {
+        global.api.searchSymbols(query).then(response => {
             this.sortResultsIntoList(response.data);
         })
     }

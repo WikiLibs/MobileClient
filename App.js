@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { registerRootComponent } from 'expo'
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack'
@@ -14,17 +13,15 @@ import FAQContainer from './components/FAQ/FAQContainer'
 import PrivacyPolicyContainer from './components/PrivacyPolicy/PrivacyPolicyContainer'
 import TermsOfUseContainer from './components/TermsOfUse/TermsOfUseContainer'
 
-import AsyncStorage from '@react-native-community/async-storage'
+import ApiService from './ApiService'
 
 const Stack = createStackNavigator()
 
 const Drawer = createDrawerNavigator();
 
-export default class App extends React.Component {
-    componentWillMount = async () => {
-        await AsyncStorage.removeItem('userToken')
-    }
+global.api = new ApiService();
 
+export default class App extends React.Component {
     render () {
         return (
             <NavigationContainer>
@@ -41,5 +38,3 @@ export default class App extends React.Component {
         )
     }
 }
-
-registerRootComponent(App)

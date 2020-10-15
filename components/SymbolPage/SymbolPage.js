@@ -1,12 +1,10 @@
 import * as React from 'react'
 import { View, Text, StyleSheet, ScrollView } from 'react-native'
-import { Avatar, Button, Card, Title, Paragraph } from 'react-native-paper'
+import { Button, IconButton, TextInput } from 'react-native-paper'
 import CodeBox from './../../tools/CodeBox'
-import ApiService from '../../ApiService'
+import showToast from './../../tools/Toast'
 
 export default class SymbolPage extends React.Component {
-    api = new ApiService();
-
     state = {
         userId: null,
         date: null,
@@ -25,20 +23,21 @@ export default class SymbolPage extends React.Component {
         mapComments: {},
         comment: {},
         exampleId: 0,
-        commentId: 0
+        commentId: 0,
+        tmpComment: ""
     }
 
     componentDidMount = async () => {
         let symbolId = this.props.route.params.params.symbolId
-        let listExample = await this.api.getExamples(symbolId)
+        let listExample = await global.api.getExamples(symbolId)
         this.setState({symbolId: symbolId});
 
         let mapIdPseudo = {};
         let mapComments = {};
         let comments = {};
         listExample.data.forEach(elem => {
-            this.api.getUser(elem.userId).then(response => {mapIdPseudo[elem.userId] = response.data.pseudo});
-            this.api.getComments(elem.id, 1).then(response => {mapComments[elem.id] = response.data});
+            global.api.getUser(elem.userId).then(response => {mapIdPseudo[elem.userId] = response.data.pseudo});
+            global.api.getComments(elem.id, 1).then(response => {mapComments[elem.id] = response.data});
             comments[elem.id] = "";
         })
 
@@ -47,9 +46,7 @@ export default class SymbolPage extends React.Component {
         this.setState({mapComments: mapComments});
         this.setState({comment: comments});
 
-        this.api.getSymbolById(symbolId).then(response => { this.setState(response.data); });
-        this.api.refresh()
-        console.log(this.api.isConnected())
+        global.api.getSymbolById(symbolId).then(response => { this.setState(response.data); });
     }
 
     getSymbolType = () => {
@@ -173,9 +170,24 @@ export default class SymbolPage extends React.Component {
         this.props.navigation.navigate("Account")
     }
 
+    onUpdateTmpCommentChange = (event) => {
+        this.setState({tmpComment: event});
+    }
+
+    onPressSend = (exampleId, comment) => {
+        global.api.postComment(exampleId, comment)
+            .then((Response) => {
+                this.setState({
+                    tmpComment: ""
+                })
+                showToast("Successfuly posted message")
+            })
+            .catch(error => {
+                console.log(error)
+            });
+    }
+
     renderExample = (example) => {
-        let list = [];
-        let comments = [];
         return (
             <View style={styles.exampleContainer}>
                 <Text style={styles.exampleDescription}>{example.description}</Text>
@@ -203,8 +215,27 @@ export default class SymbolPage extends React.Component {
                     : <Text>No comments yet.</Text>
                 }
                 <View style={styles.separatorCommentaries}/>
-                {this.api.token
-                    ? <Text>Post</Text>
+                {global.api.token
+                    ? <View style={styles.inputComment}>
+                        <TextInput
+                            label=""
+                            placeholder="Input your message"
+                            mode="outlined"
+                            selectionColor="#7B68EE"
+                            style={styles.commentInput}
+                            onChangeText={this.onUpdateTmpCommentChange}
+                            value={this.state.tmpComment}
+                        />
+                        <IconButton
+                            icon="send"
+                            mode="contained"
+                            onPress={() => this.onPressSend(example.id, this.state.tmpComment)}
+                            color="#7B68EE"
+                            style={styles.buttonSend}
+                        >
+                            SEND
+                        </IconButton>
+                    </View>
                     : <View>
                         <Text>You should login to post comments</Text>
                         <Button
@@ -241,28 +272,34 @@ export default class SymbolPage extends React.Component {
     }
 
     render () {
-        console.log(this.api.token)
         return (
-            <ScrollView style={{marginLeft: 20, marginRight: 20}}>
-                <Text style={styles.titles}>{this.getSymbolType()} | {this.getSymbolName()}</Text>
-                <Text style={styles.subtitle}>{this.getSymbolLib()}</Text>
-                <Text style={styles.subtitle}>Last updated: {this.state.lastModificationDate}</Text>
-
-                {this.state.prototypes.map((prototype, index) =>
-                    <View>
-                        {this.renderPrototype(prototype)}
-                        {this.renderDescription(prototype)}
-                        {this.renderParameters(prototype)}
-                        {this.renderReturns(prototype)}
-                        {(index !== (this.state.prototypes.length - 1))
-                            ? <View style={styles.separatorColor}/>
-                            : null
-                        }
+            <ScrollView>
+                <View style={{backgroundColor: '#dedede'}}>
+                    <View style={styles.titlesContainer}>
+                        <Text style={styles.topTitle}>{this.getSymbolType()}</Text>
+                        <Text style={styles.topTitle}>{this.getSymbolName()}</Text>
+                        <View style={styles.separator}/>
+                        <Text style={styles.subtitle}>{this.getSymbolLib()}</Text>
+                        <Text style={styles.subtitle}>Last updated: {this.state.lastModificationDate}</Text>
                     </View>
-                )}
-                <View style={styles.separatorBig} />
-                {this.renderExamples()}
-                <View style={styles.separatorBig} />
+                </View>
+                <View style={{marginLeft: 20, marginRight: 20}}>
+                    {this.state.prototypes.map((prototype, index) =>
+                        <View>
+                            {this.renderPrototype(prototype)}
+                            {this.renderDescription(prototype)}
+                            {this.renderParameters(prototype)}
+                            {this.renderReturns(prototype)}
+                            {(index !== (this.state.prototypes.length - 1))
+                                ? <View style={styles.separatorColor}/>
+                                : null
+                            }
+                        </View>
+                    )}
+                    <View style={styles.separatorBig} />
+                    {this.renderExamples()}
+                    <View style={styles.separatorBig} />
+                </View>
             </ScrollView>
         )
     }
@@ -274,13 +311,29 @@ const styles = StyleSheet.create({
       color: "#3E3E3E",
       marginBottom: 20
     },
-    titles: {
+    titlesContainer: {
+        color: "#4C3DA8",
+        fontWeight: 'bold',
+        fontStyle: 'italic',
+        fontSize: 30,
+        paddingTop: 20,
+        paddingBottom: 10,
+        marginLeft: 20,
+        marginRight: 20
+    },
+    topTitle: {
       color: "#4C3DA8",
       fontWeight: 'bold',
-      fontSize: 24,
-      marginTop: 40,
-      marginBottom: 10
+      fontStyle: 'italic',
+      fontSize: 30
     },
+    titles: {
+        color: "#4C3DA8",
+        fontWeight: 'bold',
+        fontSize: 30,
+        marginTop: 40,
+        marginBottom: 10
+      },
     subtitle: {
         fontStyle: "italic",
         color: "#3E3E3E"
@@ -382,5 +435,21 @@ const styles = StyleSheet.create({
     buttonLogin: {
         backgroundColor: '#7B68EE',
         height: 32
-    }
+    },
+    inputComment: {
+        display: 'flex',
+        flexDirection: 'row',
+        height: 30,
+        alignItems: 'flex-end',
+        marginTop: 10
+    },
+    commentInput: {
+        flexGrow: 1,
+        height: 30,
+        marginRight: 16
+    },
+    buttonSend: {
+        height: 32,
+        margin: 0
+    },
   })
