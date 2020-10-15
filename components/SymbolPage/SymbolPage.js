@@ -48,6 +48,8 @@ export default class SymbolPage extends React.Component {
         this.setState({comment: comments});
 
         this.api.getSymbolById(symbolId).then(response => { this.setState(response.data); });
+        this.api.refresh()
+        console.log(this.api.isConnected())
     }
 
     getSymbolType = () => {
@@ -167,6 +169,10 @@ export default class SymbolPage extends React.Component {
         return exampleString
     }
 
+    onPressLogin = () => {
+        this.props.navigation.navigate("Account")
+    }
+
     renderExample = (example) => {
         let list = [];
         let comments = [];
@@ -196,6 +202,20 @@ export default class SymbolPage extends React.Component {
                     )
                     : <Text>No comments yet.</Text>
                 }
+                <View style={styles.separatorCommentaries}/>
+                {this.api.token
+                    ? <Text>Post</Text>
+                    : <View>
+                        <Text>You should login to post comments</Text>
+                        <Button
+                            mode="contained"
+                            onPress={this.onPressLogin}
+                            contentStyle={styles.buttonLogin}
+                        >
+                            LOGIN
+                        </Button>
+                    </View>
+                }
             </View>
         )
     }
@@ -221,6 +241,7 @@ export default class SymbolPage extends React.Component {
     }
 
     render () {
+        console.log(this.api.token)
         return (
             <ScrollView style={{marginLeft: 20, marginRight: 20}}>
                 <Text style={styles.titles}>{this.getSymbolType()} | {this.getSymbolName()}</Text>
@@ -357,5 +378,9 @@ const styles = StyleSheet.create({
     },
     exampleCommentairesCommentaryDate: {
         color: "#3E3E3E"
+    },
+    buttonLogin: {
+        backgroundColor: '#7B68EE',
+        height: 32
     }
   })

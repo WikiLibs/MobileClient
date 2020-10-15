@@ -5,7 +5,7 @@ export default class ApiService {
     url = "https://wikilibs-dev-api.azurewebsites.net/";
     apiKey = "5c2a6a60-c5b3-4df2-b0bf-5235fd495e8a";
 
-    userToken = null
+    token = null
 
     getDebug() {
         return (Axios.get(this.url + "/debug"));
@@ -220,6 +220,12 @@ export default class ApiService {
                 AsyncStorage.setItem('userToken', Response.data)
                 this.token=Response.data
             }));
+    }
+
+    isConnected() {
+        if (this.token)
+            return true
+        return false
     }
 
     refresh() {

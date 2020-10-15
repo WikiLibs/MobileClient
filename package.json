@@ -38,7 +38,8 @@
     "react-navigation": "^4.4.0",
     "react-navigation-stack": "^2.8.2",
     "sync-storage": "^0.4.2",
-    "undefined": "react-native-community/async-storage"
+    "undefined": "react-native-community/async-storage",
+    "react-native-reanimated": "~1.9.0"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0",
