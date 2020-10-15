@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { registerRootComponent } from 'expo'
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack'
@@ -40,3 +41,5 @@ export default class App extends React.Component {
         )
     }
 }
+
+registerRootComponent(App)
