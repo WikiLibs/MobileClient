@@ -16,6 +16,7 @@ export default class TreeView extends React.Component {
                         onChange={(selectedOptions) => this.setState({selectedOptions})}
                         selectedOptions={this.state.selectedOptions} 
                         level={0}
+                        navigation={this.props.navigation}
                     />
                     : <Text>Could not found data</Text>
                 }
@@ -24,8 +25,16 @@ export default class TreeView extends React.Component {
     }
 }
 
-const TreeList = ({ options, selectedOptions, onChange, level}) => {
-    const handleElementClicked = (selectedOptionId) => {
+const TreeList = ({ options, selectedOptions, onChange, level, navigation}) => {
+    const handleElementClicked = (selectedOptionId, level) => {
+        if (level >= 2) {
+            navigation.navigate("SymbolPage", {
+                params: {
+                    symbolId: selectedOptionId
+                }
+            })
+            return
+        }
         if (selectedOptions[selectedOptionId]){ // Is currently selected
             delete selectedOptions[selectedOptionId]; // Remove selected key from options list
         } else { // is not currently selected
@@ -52,7 +61,7 @@ const TreeList = ({ options, selectedOptions, onChange, level}) => {
         <View>
             {options.map(option => (
                 <View>
-                    <TouchableOpacity onPress={() => handleElementClicked(option.id)}>
+                    <TouchableOpacity onPress={() => handleElementClicked(option.id, level)}>
                         <View style={{height: 32, display: 'flex', flexDirection: 'row', marginLeft: level * 32, alignItems: 'center'}}>
                             {getIndicator(selectedOptions[option.id], option.subContent.length > 0)}
                             <Text>{option.name}</Text>
@@ -64,6 +73,7 @@ const TreeList = ({ options, selectedOptions, onChange, level}) => {
                             selectedOptions={selectedOptions[option.id]} 
                             onChange={(subSelections) => handleSubOptionsListChange(option.id, subSelections)}
                             level={level + 1}
+                            navigation={navigation}
                         />
                     }
                 </View>

@@ -1,66 +1,6 @@
 import * as React from 'react'
-import { View, Text, StyleSheet, ScrollView } from 'react-native'
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
+import { Text, StyleSheet, ScrollView } from 'react-native'
 import TreeView from '../../tools/TreeView'
-
-
-
-const data = [
-  {
-    name: "Pepperoni",
-    id: "pepperoni-id",
-    subContent: [
-      {
-        name: "Spicy",
-        id: "spicy-id",
-        subContent: []
-      },
-      {
-        name: "Regular",
-        id: "regular-id",
-        subContent: []
-      }
-    ]
-  },
-  {
-    name: "Chicken",
-    id: "chicken-id",
-    subContent: [
-      {
-        name: "Buffalo",
-        id: "buffalo-id",
-        subContent: [
-          {
-            name: "Mild",
-            id: 'mild-id',
-            subContent: [],
-          },
-          {
-            name: "Hot",
-            id: 'hot-id',
-            subContent: [
-              {
-                name: 'Jalapeño',
-                id: 'jalapeno-id',
-                subContent: []
-              },
-              {
-                name: 'Cayenne',
-                id: 'cayenne-id',
-                subContent: []
-              }
-            ],
-          },
-        ]
-      },
-      {
-        name: "BBQ",
-        id: 'bbq-id',
-        subContent: [],
-      }
-    ]
-  },
-]
 
 export default class TreeViewPage extends React.Component {
     state = {
@@ -120,10 +60,11 @@ export default class TreeViewPage extends React.Component {
     }
 
     render () {
+        console.log(this.props.navigation)
         return (
             <ScrollView style={{margin: 16}}>
                 <Text style={styles.topTitle}>{this.state.langName} - Tree view</Text>
-                <TreeView data={this.state.data} />
+                <TreeView data={this.state.data} {...this.props}/>
             </ScrollView>
         )
     }

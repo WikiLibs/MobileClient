@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { ScrollView, View, Text, StyleSheet, ImageBackground, Image, TouchableOpacity } from 'react-native';
-import { Avatar, Card, Title, Paragraph, Icon } from 'react-native-paper'
+import { ScrollView, View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { Avatar, Card } from 'react-native-paper'
 
 const LeftContent = (props, imageSource) => <Avatar.Image {...props} source={imageSource} />
 

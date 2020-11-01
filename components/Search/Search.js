@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { View, Text, StyleSheet, ScrollView, Button, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
 import { Avatar, Card, Title, Paragraph } from 'react-native-paper'
 import { SearchBar } from 'react-native-elements'
 import CustomButton from './../../tools/CustomButton'

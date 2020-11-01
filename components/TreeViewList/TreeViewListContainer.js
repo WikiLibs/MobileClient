@@ -1,11 +1,11 @@
 import React from 'react'
-import { Text, View, Button } from 'react-native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { StackActions } from '@react-navigation/native'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import TreeViewList from './TreeViewList'
 import TreeViewPage from '../TreeViewPage/TreeViewPage'
+import SymbolPage from '../SymbolPage/SymbolPage'
 
 const TreeViewListStack = createStackNavigator()
 const popAction = StackActions.pop(1)
@@ -38,6 +38,22 @@ export default function TreeViewListContainer({ navigation }) {
             component={TreeViewPage}
             options={{
                 title: "Tree View",
+                headerLeft: () => (
+                    <Icon 
+                        name="arrow-left"
+                        size={25}
+                        style={{marginStart: 15}}
+                        color="#fff"
+                        onPress={() => navigation.dispatch(popAction)}
+                    />
+                )
+            }}
+        />
+        <TreeViewListStack.Screen
+            name="SymbolPage"
+            component={SymbolPage}
+            options={{
+                title: "Symbol",
                 headerLeft: () => (
                     <Icon 
                         name="arrow-left"
