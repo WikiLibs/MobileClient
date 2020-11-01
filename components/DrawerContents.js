@@ -55,6 +55,17 @@ export default function DrawerContents (props) {
                         />
                     )}
                 />
+                <DrawerItem
+                    label="Tree View List"
+                    onPress={() => props.navigation.navigate("Tree View List")}
+                    icon={({color, size}) => (
+                        <Icon 
+                        name="file-tree" 
+                        color="#4C3DA8"
+                        size={size}
+                        />
+                    )}
+                />
             </DrawerContentScrollView>
             <Drawer.Section style={{marginBottom: 15}}>
                 <DrawerItem

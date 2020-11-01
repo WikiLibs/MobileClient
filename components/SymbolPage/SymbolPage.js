@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { View, Text, StyleSheet, ScrollView } from 'react-native'
 import { Button, IconButton, TextInput } from 'react-native-paper'
-import { cos } from 'react-native-reanimated'
 import CodeBox from './../../tools/CodeBox'
 import showToast from './../../tools/Toast'
 
@@ -47,8 +46,6 @@ export default class SymbolPage extends React.Component {
             comments[elem.id] = "";
         })
 
-        //console.log(listExample)
-
         this.setState({mapIdPseudo: mapIdPseudo});
         this.setState({listExample: listExample.data});
         this.setState({mapComments: mapComments});
@@ -93,12 +90,13 @@ export default class SymbolPage extends React.Component {
         return false
     }
 
-    renderPrototype = (prototype) => {
+    renderPrototype = (prototype, language) => {
         return (
             <View>
                 <Text style={styles.titles}>Prototype</Text>
                 <CodeBox 
                     code={prototype.prototype}
+                    language={this.state.lang.name}
                 />
             </View>
         )
@@ -157,6 +155,22 @@ export default class SymbolPage extends React.Component {
         )
     }
 
+    renderExceptions = (prototype) => {
+        if (prototype.exceptions.length === 0)
+            return null
+        return (
+            <View>
+                <Text style={styles.titles}>Exceptions(s)</Text>
+                {prototype.exceptions.map((exception, index) =>
+                    <View>
+                        <Text style={styles.parameter}>{exception.ref.path}</Text>
+                        <Text style={styles.parameterDescription}>{exception.description}</Text>
+                    </View>
+                )}
+            </View>
+        )
+    }
+
     getExample = (exampleTab) => {
         let exampleString = ''
         let indent = ''
@@ -207,15 +221,47 @@ export default class SymbolPage extends React.Component {
                             ? <View style={styles.separatorCommentariesIndividual}/>
                             : null
                         }
+                        <Text>{comment.data}</Text>
                         <View style={styles.exampleCommentairesCommentaryContainer}>
-                            <Text style={styles.exampleCommentaries}>{comment.data}</Text>
-                            <Text style={styles.exampleCommentairesCommentary}>-   {this.state.mapIdPseudo[comment.userId]}</Text>
-                            <Text style={styles.exampleCommentairesCommentaryDate}>   {(new Date(comment.creationDate)).toLocaleDateString()}</Text>
+                            <Text style={styles.exampleCommentairesCommentary}>{this.state.mapIdPseudo[comment.userId]}</Text>
+                            <Text style={styles.exampleCommentairesCommentaryDate}> - {(new Date(comment.creationDate)).toLocaleDateString()}</Text>
                         </View>
                     </View>
                 )
                 : <Text>No comments yet.</Text>
                 }
+            </View>
+        )
+    }
+
+    onPressUpvote = (exampleId) => {
+        console.log('upvote example_id: ' + exampleId.toString())
+    }
+
+    onPressDownvote = (exampleId) => {
+        console.log('downvote example_id: ' + exampleId.toString())
+    }
+
+    renderUpvotes = (example) => {
+        return (
+            <View style={styles.upvoteContainer}>
+                <Text>xxx points</Text>
+                <View style={styles.upvoteButtonsContainer}>
+                    <IconButton
+                        icon="arrow-up"
+                        mode="contained"
+                        onPress={() => this.onPressUpvote(example.id)}
+                        color="#6FEB39"
+                        style={styles.buttonVote}
+                    />
+                    <IconButton
+                        icon="arrow-down"
+                        mode="contained"
+                        onPress={() => this.onPressDownvote(example.id)}
+                        color="#EB6439"
+                        style={styles.buttonVote}
+                    />
+                </View>
             </View>
         )
     }
@@ -227,12 +273,15 @@ export default class SymbolPage extends React.Component {
                 <View style={styles.separatorDescription}/>
                 <CodeBox
                     code={this.getExample(example.code)}
+                    language={this.state.lang ? this.state.lang.name : 'C'}
                 />
                 <Text style={styles.exampleModification}>Last modification: {this.state.mapIdPseudo[example.userId]} {(new Date(example.lastModificationDate)).toLocaleDateString()}</Text>
                 <View style={styles.separatorCommentaries}/>
+                {this.renderUpvotes(example)}
+                <View style={styles.separatorCommentaries}/>
                 <Text style={styles.exampleCommentariesTitle}>Comments</Text>
                 {this.renderComments(example.id)}
-                <View style={styles.separatorCommentaries}/>
+                <View style={styles.separatorCommentariesInput}/>
                 {global.api.token
                     ? <View style={styles.inputComment}>
                         <TextInput
@@ -255,7 +304,7 @@ export default class SymbolPage extends React.Component {
                         </IconButton>
                     </View>
                     : <View>
-                        <Text>You should login to post comments</Text>
+                        <Text style={{marginBottom: 8}}>You should login to post comments</Text>
                         <Button
                             mode="contained"
                             onPress={this.onPressLogin}
@@ -294,8 +343,8 @@ export default class SymbolPage extends React.Component {
             <ScrollView>
                 <View style={{backgroundColor: '#dedede'}}>
                     <View style={styles.titlesContainer}>
-                        <Text style={styles.topTitle}>{this.getSymbolType()}</Text>
                         <Text style={styles.topTitle}>{this.getSymbolName()}</Text>
+                        <Text style={styles.topTitleBottom}>{this.getSymbolType()}</Text>
                         <View style={styles.separator}/>
                         <Text style={styles.subtitle}>{this.getSymbolLib()}</Text>
                         <Text style={styles.subtitle}>Last updated: {(new Date(this.state.lastModificationDate)).toLocaleDateString()}</Text>
@@ -308,6 +357,7 @@ export default class SymbolPage extends React.Component {
                             {this.renderDescription(prototype)}
                             {this.renderParameters(prototype)}
                             {this.renderReturns(prototype)}
+                            {this.renderExceptions(prototype)}
                             {(index !== (this.state.prototypes.length - 1))
                                 ? <View style={styles.separatorColor}/>
                                 : null
@@ -345,6 +395,12 @@ const styles = StyleSheet.create({
       fontStyle: 'italic',
       fontSize: 30
     },
+    topTitleBottom: {
+        color: "#4C3DA8",
+        fontWeight: 'bold',
+        fontStyle: 'italic',
+        fontSize: 16
+      },
     titles: {
         color: "#4C3DA8",
         fontWeight: 'bold',
@@ -400,20 +456,35 @@ const styles = StyleSheet.create({
         marginTop: 32
     },
     exampleContainer: {
-        borderColor: "#EBEBEB",
+        borderColor: "#dedede",
         borderRadius: 5,
         borderWidth: 2,
         marginBottom: 8,
         padding: 16
     },
     exampleDescription: {
-        marginBottom: 8
+        marginBottom: 8,
+        fontStyle: 'italic',
+        fontSize: 16
     },
     exampleModification: {
         marginTop: 16,
         fontStyle: 'italic',
         fontSize: 12,
         color: "#3E3E3E"
+    },
+    upvoteContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: -8,
+        marginBottom: -8
+    },
+    upvoteButtonsContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between'
     },
     separatorDescription: {
         height: 1,
@@ -422,18 +493,21 @@ const styles = StyleSheet.create({
     },
     separatorCommentaries: {
         height: 1,
-        backgroundColor: '#EBEBEB',
+        backgroundColor: '#dedede',
+        marginBottom: 16,
+        marginTop: 16
+    },
+    separatorCommentariesInput: {
+        height: 1,
+        backgroundColor: '#dedede',
         marginBottom: 8,
         marginTop: 8
     },
     exampleCommentariesTitle: {
         color: "#4C3DA8",
         fontWeight: 'bold',
+        fontSize: 16,
         marginBottom: 8
-    },
-    exampleCommentaries: {
-        marginLeft: 8,
-        marginRight: 8
     },
     separatorCommentariesIndividual: {
         height: 1,
@@ -446,10 +520,12 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap'
     },
     exampleCommentairesCommentary: {
-        color: "#4C3DA8"
+        color: "#4C3DA8",
+        fontSize: 12
     },
     exampleCommentairesCommentaryDate: {
-        color: "#3E3E3E"
+        color: "#3E3E3E",
+        fontSize: 12
     },
     buttonLogin: {
         backgroundColor: '#7B68EE',
@@ -471,4 +547,10 @@ const styles = StyleSheet.create({
         height: 32,
         margin: 0
     },
+    buttonVote: {
+        height: 16,
+        width: 16,
+        marginLeft: 8,
+        marginRight: 8
+    }
   })

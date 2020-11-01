@@ -179,6 +179,14 @@ export default class ApiService {
         }));
     }
 
+    getLibElements(libId) {
+        return (Axios.get(this.url + "/symbol/lib/" + libId + "/tree/root", {
+            'headers': {
+                'Authorization': this.apiKey
+            }
+        }))
+    }
+
     getSymbolById(id) {
         return (Axios.get(this.url + "/symbol?id=" + id, {
             'headers': {

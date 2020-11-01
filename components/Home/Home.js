@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { ScrollView, View, Text, StyleSheet, ImageBackground, Image } from 'react-native';
+import * as React from 'react'
+import { ScrollView, View, Text, StyleSheet, ImageBackground, Image } from 'react-native'
 
 export default class Home extends React.Component {
     renderHeader() {
@@ -75,10 +75,12 @@ const styles = StyleSheet.create({
     },
     headerImageTextContainer: {
         display: 'flex',
-        flexDirection: 'row'
+        flexDirection: 'row',
+        flexShrink: 1
     },
     headerTextContainer: {
         marginLeft: 32,
+        marginRight: 32,
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between'
@@ -93,12 +95,13 @@ const styles = StyleSheet.create({
         color: 'white',
         fontStyle: 'italic',
         fontWeight: 'bold',
-        fontSize: 14
+        fontSize: 14,
+        flex: 1
     },
     headerImage: {
         height: 100,
         width: 100,
-        marginLeft: 50
+        marginLeft: 32
     },
     mainContent: {
         margin: 32,
