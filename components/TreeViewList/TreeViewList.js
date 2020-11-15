@@ -23,7 +23,7 @@ export default class TreeViewList extends React.Component {
     }
 
     onClickCard = (lang) => () => {
-        this.props.navigation.navigate("TreeViewPage", {
+        this.props.navigation.navigate("TreeViewLibList", {
             params: {
                 langId: lang.id,
                 langName: lang.displayName

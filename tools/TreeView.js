@@ -1,10 +1,11 @@
 import * as React from 'react'
-import { View, Text, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, ScrollView, View, Text, TouchableOpacity } from 'react-native';
 import { Avatar } from 'react-native-paper';
 
 export default class TreeView extends React.Component {
     state = {
-        selectedOptions: {}
+        selectedOptions: {},
+        currentPath: ""
     }
     
     render = () => {
@@ -14,9 +15,11 @@ export default class TreeView extends React.Component {
                     ? <TreeList 
                         options={this.props.data}
                         onChange={(selectedOptions) => this.setState({selectedOptions})}
+                        getSubContent={this.props.getSubContent}
                         selectedOptions={this.state.selectedOptions} 
                         level={0}
                         navigation={this.props.navigation}
+                        currentPath={this.state.currentPath}
                     />
                     : <Text>Could not found data</Text>
                 }
@@ -25,20 +28,47 @@ export default class TreeView extends React.Component {
     }
 }
 
-const TreeList = ({ options, selectedOptions, onChange, level, navigation}) => {
-    const handleElementClicked = (selectedOptionId, level) => {
-        if (level >= 2) {
-            navigation.navigate("SymbolPage", {
+const TreeList = ({
+    options,
+    onChange,
+    getSubContent,
+    selectedOptions,
+    level,
+    navigation,
+    currentPath
+}) => {
+    const couldBeNested = (path) => {
+        let pathArray = path.split('.')
+        if (pathArray.length >= 2 && pathArray.length % 2 === 0) {
+            let type = pathArray[pathArray.length - 2]
+            switch (type) {
+                case "class":
+                case "union":
+                case "struct":
+                    return true
+                default:
+                    return false
+            }
+        }
+        return false
+    }
+
+    const handleElementClicked = async (option) => {
+        let currentTmpPath = currentPath + '.' + option.name
+        let canBeNested = couldBeNested(currentTmpPath)
+
+        if (level >= 1 && !option.subContent && canBeNested) {
+            await getSubContent(option.id, currentTmpPath)
+        } else if (level >= 1 && level % 2 == 1 && ((option.subContent && !option.subContent.length) || !canBeNested)) {
+            navigation.navigate('SymbolPage', {
                 params: {
-                    symbolId: selectedOptionId
+                    symbolId: option.id
                 }
             })
-            return
-        }
-        if (selectedOptions[selectedOptionId]){ // Is currently selected
-            delete selectedOptions[selectedOptionId]; // Remove selected key from options list
+        } if (selectedOptions[option.id]){ // Is currently selected
+            delete selectedOptions[option.id]; // Remove selected key from options list
         } else { // is not currently selected
-            selectedOptions[selectedOptionId] = {} // Add selected key to optionsList
+            selectedOptions[option.id] = {} // Add selected key to optionsList
         }
         onChange(selectedOptions) // call onChange function given by parent
     }
@@ -48,36 +78,44 @@ const TreeList = ({ options, selectedOptions, onChange, level, navigation}) => {
         onChange(selectedOptions);
     }
 
-    const getIndicator = (isSelected, hasNext) => {
-        if (isSelected && hasNext)
+    /* const getIndicator = (isSelected, hasNext) => { */
+    const getIndicator = (option, selectedOptions) => {
+        let isSelected = selectedOptions[option.id]
+        let hasNext = option.subContent && option.subContent.length > 0
+        
+        if (option.isLoading)
+            return <View style={{margin: 6}}><ActivityIndicator size="small" color="#7B68EE" /></View>
+        else if (isSelected && hasNext)
             return <Avatar.Icon color={'#7B68EE'} style={{backgroundColor: '#1fe0'}} size={32} icon='chevron-down' />
         else if (hasNext)
             return <Avatar.Icon color={'#7B68EE'} style={{backgroundColor: '#1fe0'}} size={32} icon='chevron-right' />
         else
-            return <Avatar.Icon color={'#7B68EE'} style={{backgroundColor: '#1fe0', marginLeft: 8, marginRight: 8}} size={16} icon='record' />
+            return <Avatar.Icon color={'#7B68EE'} style={{backgroundColor: '#1fe0', margin: 8}} size={16} icon='record' />
     }
     
     return (
         <View>
             {options.map(option => (
                 <View>
-                    <TouchableOpacity onPress={() => handleElementClicked(option.id, level)}>
-                        <View style={{height: 32, display: 'flex', flexDirection: 'row', marginLeft: level * 32, alignItems: 'center'}}>
-                            {getIndicator(selectedOptions[option.id], option.subContent.length > 0)}
+                    <TouchableOpacity onPress={() => handleElementClicked(option, level)}>
+                        <View style={{height: 'auto', display: 'flex', flexDirection: 'row', marginLeft: level * 32, marginBottom: 8, alignItems: 'center'}}>
+                            {getIndicator(option, selectedOptions)}
                             <Text>{option.name}</Text>
                         </View>
                     </TouchableOpacity>
-                    {(option.subContent.length > 0 && selectedOptions[option.id]) &&
+                    {(option.subContent && option.subContent.length > 0 && selectedOptions[option.id]) &&
                         <TreeList
                             options={option.subContent}
-                            selectedOptions={selectedOptions[option.id]} 
                             onChange={(subSelections) => handleSubOptionsListChange(option.id, subSelections)}
+                            getSubContent={getSubContent}
+                            selectedOptions={selectedOptions[option.id]} 
                             level={level + 1}
                             navigation={navigation}
+                            currentPath={currentPath.length === 0 ? option.name : currentPath + '.' + option.name}
                         />
                     }
                 </View>
             ))}
-      </View>
+        </View>
     )
 }

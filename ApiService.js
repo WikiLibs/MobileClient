@@ -187,6 +187,14 @@ export default class ApiService {
         }))
     }
 
+    getSymElements(libId, symId) {
+        return (Axios.get(this.url + '/symbol/lib/' + libId + '/tree/' + symId, {
+            'headers': {
+                'Authorization': this.apiKey
+            }
+        }))
+    }
+
     getSymbolById(id) {
         return (Axios.get(this.url + "/symbol?id=" + id, {
             'headers': {
@@ -243,6 +251,20 @@ export default class ApiService {
             .then((response) => {
                 this.token=response.data
             }));
+    }
+
+    resetPassword(email) {
+        return (Axios.post(
+            this.url + "/auth/internal/reset",
+            {
+                email: email
+            },
+            {
+                headers: {
+                    'Authorization': this.apiKey
+                }
+            }
+        ))
     }
 
     getMe() {

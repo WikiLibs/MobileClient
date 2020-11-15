@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native'
+import { View, Text, StyleSheet, ScrollView } from 'react-native'
 import { Button, Switch, TextInput } from 'react-native-paper'
 import ApiService from '../../ApiService'
 import showToast from './../../tools/Toast'
@@ -52,6 +52,11 @@ export default class Account extends React.Component {
             updatePassword: '',
             updatePasswordOld: ''
         })
+    }
+
+    onPressDisconnect = () => {
+        global.api.disconnect()
+        this.setState({isConnected: false})
     }
 
     onPressUpdate = () => {
@@ -131,6 +136,14 @@ export default class Account extends React.Component {
                                 >
                                     MODIFY PROFILE
                                 </Button>
+                                <View style={styles.separator}/>
+                                <Button
+                                    mode="contained"
+                                    onPress={this.onPressDisconnect}
+                                    contentStyle={styles.buttonLogin}
+                                >
+                                    DISCONNECT
+                                </Button>
                             </View>
                             : <View>
                                 <Text style={styles.title}>Update account</Text>
@@ -208,8 +221,7 @@ export default class Account extends React.Component {
     onPressLogin = () => {
         global.api.connectUser(this.state)
             .then((Response) => {
-                if (Platform.OS === 'android')
-                    showToast("Successfuly signed in")
+                showToast("Successfuly signed in")
                 this.setState({isConnected: true})
                 global.api.getMe().then((Response) =>{
                     this.setState({user: Response.data})
@@ -232,6 +244,7 @@ export default class Account extends React.Component {
     }
 
     onPressForgotSend = () => {
+        global.api.resetPassword(this.state.emailForgot)
         this.setState({
             forgetPasswordOn: false,
             emailForgot: ''
@@ -295,7 +308,7 @@ export default class Account extends React.Component {
                         onPress={this.onPressForgot}
                         contentStyle={styles.buttonLogin}
                     >
-                        SEND MAIL
+                        RESET PASSWORD
                     </Button>
                     : <View>
                         <TextInput

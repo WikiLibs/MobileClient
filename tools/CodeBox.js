@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text, StyleSheet, ScrollView } from 'react-native'
+import { View, Text, StyleSheet } from 'react-native'
 import SyntaxHighlighter from 'react-native-syntax-highlighter'
 import { solarizedLight } from 'react-syntax-highlighter/styles/hljs'
 
@@ -7,13 +7,16 @@ export default function CodeBox(props) {
     return (
         <View style={styles.codeBoxContainer}>
             <View style={styles.codeBox}>
-                <SyntaxHighlighter 
-                    language={props.language}
-                    style={solarizedLight}
-                    wrapLines
-                >
-                    {props.code}
-                </SyntaxHighlighter>
+                {props.isTerminal
+                    ? <Text>{props.code}</Text>
+                    : <SyntaxHighlighter 
+                        language={props.language}
+                        style={solarizedLight}
+                        wrapLines
+                    >
+                        {props.code}
+                    </SyntaxHighlighter>
+                }
             </View>
         </View>
     );

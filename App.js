@@ -27,10 +27,10 @@ export default class App extends React.Component {
         return (
             <NavigationContainer>
                 <Drawer.Navigator drawerContent={props => <DrawerContents {...props} />}>
+                    <Drawer.Screen name="Tree View List" component={TreeViewListContainer}/>
                     <Drawer.Screen name="Home" component={HomeContainer}/>
                     <Drawer.Screen name="Account" component={AccountContainer}/>
                     <Drawer.Screen name="Search" component={SearchContainer}/>
-                    <Drawer.Screen name="Tree View List" component={TreeViewListContainer}/>
                     <Drawer.Screen name="Contact" component={ContactContainer}/>
                     <Drawer.Screen name="FAQ" component={FAQContainer}/>
                     <Drawer.Screen name="Privacy Policy" component={PrivacyPolicyContainer}/>
