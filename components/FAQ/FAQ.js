@@ -28,6 +28,14 @@ const CONTENT = [
     {
         title: '+ I lost my password.',
         content: 'Please check the login page and follow the links.',
+    },
+    {
+        title: '+ I lost my email.',
+        content: 'Please send us a mail with your infos (links in Contacts).',
+    },
+    {
+        title: '+ I want to delete my account.',
+        content: 'Please send us a mail with your infos (links in Contacts).',
     }
 ];
 

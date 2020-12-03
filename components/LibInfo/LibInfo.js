@@ -47,6 +47,7 @@ This is a sketch of the resulting directory structure:
 <note>
 See the Linux and macOS platform docs for a troubleshooting guide and more information about building your projects for Unix-like systems.
 </note>
+
 `,
         statementList: []
     }

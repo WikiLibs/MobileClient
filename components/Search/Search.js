@@ -139,6 +139,18 @@ export default class Search extends React.Component {
         return symbolName
     }
 
+    getLibName = (path) => {
+        let splitedPath = path.split('/')
+
+        return splitedPath[1]
+    }
+
+    getSubtitle = (path) => {
+        let splitedPath = path.split('/')
+
+        return (splitedPath[0] + ' - ' + splitedPath[1])
+    }
+
     onClickCard = (symbolId) => () => {
         this.props.navigation.navigate("SymbolPage", {
             params: {
@@ -159,13 +171,13 @@ export default class Search extends React.Component {
                         {this.state.symbols[key].map((symbol) =>
                             <TouchableOpacity onPress={this.onClickCard(symbol.id)}>
                                 <Card style={styles.cardContainer}>
-                                    <Card.Title title={this.getSymbolName(this.getDisplayPath(symbol))} subtitle={this.getSymbolPath(this.getDisplayPath(symbol))} /*left={LeftContent}*/ />
-                                    <Card.Content>
-                                        <Paragraph>Description unavailable yet.</Paragraph>
-                                    </Card.Content>
+                                    <Card.Title title={this.getSymbolName(this.getDisplayPath(symbol))} titleStyle={{color: '#4C3DA8'}} subtitle={this.getSubtitle(symbol.path)} />
                                     <View style={styles.separator}></View>
                                     <Card.Content>
-                                        <Paragraph>Last update : {(new Date(symbol.lastModificationDate)).toLocaleDateString()} (by: {symbol.userName})</Paragraph>
+                                        <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+                                            <Text style={{fontSize: 10, color: '#0000008A'}}>Last update : {(new Date(symbol.lastModificationDate)).toLocaleDateString()} (by: {symbol.userName})</Text>
+                                            <Text style={{fontSize: 10, color: '#0000008A'}}>Viewed {symbol.views} time(s)</Text>
+                                        </View>
                                     </Card.Content>
                                 </Card>
                             </TouchableOpacity>
@@ -279,5 +291,10 @@ const styles = StyleSheet.create({
         borderColor: "#7B68EE",
         borderWidth: 1,
         paddingLeft: 10
+    },
+    separator: {
+        height: 1,
+        backgroundColor: '#cccccc',
+        margin: 8
     }
   })
