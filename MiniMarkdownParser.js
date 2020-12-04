@@ -26,7 +26,6 @@ PAGE_CONTENT = STATEMENT PARAGRAPH*
 
 import he from "he";
 
-const TERMINAL = /\s*`(.*)`\s*/;
 const BUTTON_WITH_DESC = /\[(.+)]\s*\((.+)\s*"(.+)"\)/;
 const BUTTON_WITHOUT_DESC = /\[(.+)]\s*\((.+)\)/;
 const URL_REGEX = /\[([^\]]+)]\s*\(([^)]+)\)/;
@@ -106,8 +105,8 @@ function parseMarkdown(text) {
                 type: Statement.Title,
                 data: title
             });
-        } else if (p.trim().startsWith("`") && p.match(TERMINAL)) {
-            const tcommand = he.decode(p.replace(TERMINAL, "$1"));
+        } else if (p.trim().startsWith("`") && p.trim().endsWith("`")) {
+            const tcommand = he.decode(p.substring(1, p.length - 1));
             statementList.push({
                 type: Statement.Terminal,
                 data: tcommand
@@ -133,16 +132,16 @@ function parseMarkdown(text) {
                 link: link
             });
         } else if (p.trimStart().startsWith("<note>") && p.trimEnd().endsWith("</note>")) {
-            const body = p.substring(7).trim();
+            const body = p.substring(6, p.length - 7).trim();
             statementList.push({
                 type: Statement.SmallNote,
                 tokens: processTextBodyInTokens(body)
             });
         } else if (p.startsWith("<note>")) {
-            noteTitle = p.substring(7).trim();
+            noteTitle = p.substring(6).trim();
         } else if (p.endsWith("</note>")) {
             const title = he.decode(noteTitle);
-            const body = he.decode(p.substring(0, p.length - 8).trim());
+            const body = he.decode(p.substring(0, p.length - 7).trim());
             statementList.push({
                 type: Statement.Note,
                 title: title,
@@ -156,7 +155,6 @@ function parseMarkdown(text) {
             });
         }
     }
-    console.log(statementList)
     return statementList;
 }
 

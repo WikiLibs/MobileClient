@@ -72,7 +72,7 @@ export default class ApiService {
         let symbolId = "?SymbolId=" + id;
         return (Axios.get(this.url + "/example" + symbolId, {
             'headers': {
-                'Authorization': this.apiKey
+                'Authorization': this.token ? 'Bearer ' + this.token : this.apiKey
             }
         }));
     }
@@ -148,6 +148,26 @@ export default class ApiService {
 
     /////////////////////////////////////////////////////////
 
+    upvoteExample(exampleId) {
+        return (Axios.post(this.url + "/example/" + exampleId + "/upvote", {},
+        {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            }
+        }));
+    }
+
+    downvoteExample(exampleId) {
+        return (Axios.post(this.url + "/example/" + exampleId + "/downvote", {},
+        {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            }
+        }));
+    }
+
+    /////////////////////////////////////////////////////////
+
     translateErrorMessage(err) {
         if (err === null || err === undefined || err.response === null || err.response === undefined)
             return ("An impossible error has occured: AXIOS is a failure.");
@@ -173,6 +193,14 @@ export default class ApiService {
 
     getLibs(lang) {
         return (Axios.get(this.url + "/symbol/lang/" + lang, {
+            'headers': {
+                'Authorization': this.apiKey
+            }
+        }));
+    }
+
+    getLibInfo(libId) {
+        return (Axios.get(this.url + "/symbol/lib/" + libId, {
             'headers': {
                 'Authorization': this.apiKey
             }
@@ -269,6 +297,14 @@ export default class ApiService {
 
     getMe() {
         return (Axios.get(this.url + "/user/me", {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            }
+        }));
+    }
+
+    getMePicture() {
+        return (Axios.get(this.url + "/user/me/icon", {
             headers: {
                 'Authorization': 'Bearer ' + this.token
             }

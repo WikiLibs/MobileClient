@@ -234,34 +234,58 @@ export default class SymbolPage extends React.Component {
         )
     }
 
-    onPressUpvote = (exampleId) => {
-        console.log('upvote example_id: ' + exampleId.toString())
+    onPressUpvote = (example) => {
+        if (example.hasVoted) {
+            showToast("Already voted")
+            return
+        }
+        global.api.upvoteExample(example.id)
+            .then(() => {
+                showToast("Successfuly upvoted")
+            })
+            .catch(() => {
+                showToast("Error happened while upvoting")
+            });
     }
 
-    onPressDownvote = (exampleId) => {
-        console.log('downvote example_id: ' + exampleId.toString())
+    onPressDownvote = (example) => {
+        if (example.hasVoted) {
+            showToast("Already voted")
+            return
+        }
+        global.api.downvoteExample(example.id)
+            .then(() => {
+                showToast("Successfuly downvoted")
+            })
+            .catch(() => {
+                showToast("Error happened while downvoting")
+            });
     }
 
     renderUpvotes = (example) => {
         return (
             <View style={styles.upvoteContainer}>
-                <Text>xxx points</Text>
-                <View style={styles.upvoteButtonsContainer}>
-                    <IconButton
-                        icon="arrow-up"
-                        mode="contained"
-                        onPress={() => this.onPressUpvote(example.id)}
-                        color="#6FEB39"
-                        style={styles.buttonVote}
-                    />
-                    <IconButton
-                        icon="arrow-down"
-                        mode="contained"
-                        onPress={() => this.onPressDownvote(example.id)}
-                        color="#EB6439"
-                        style={styles.buttonVote}
-                    />
-                </View>
+                <Text>{example.voteCount} points</Text>
+                {typeof example.hasVoted === 'boolean'
+                    ? <View style={styles.upvoteButtonsContainer}>
+                        <IconButton
+                            icon="arrow-up"
+                            mode="contained"
+                            onPress={() => this.onPressUpvote(example)}
+                            color={example.hasVoted ? "#dedede" : "#81D89F"}
+                            style={styles.buttonVote}
+                        />
+                        <IconButton
+                            icon="arrow-down"
+                            mode="contained"
+                            onPress={() => this.onPressDownvote(example)}
+                            color={example.hasVoted ? "#dedede" : "#F85B5B"}
+                            style={styles.buttonVote}
+                        />
+                    </View>
+                    : null
+                }
+                
             </View>
         )
     }
@@ -275,7 +299,7 @@ export default class SymbolPage extends React.Component {
                     code={this.getExample(example.code)}
                     language={this.state.lang ? this.state.lang.name : 'C'}
                 />
-                <Text style={styles.exampleModification}>Last modification: {this.state.mapIdPseudo[example.userId]} {(new Date(example.lastModificationDate)).toLocaleDateString()}</Text>
+                <Text style={styles.exampleModification}>Created at: {this.state.mapIdPseudo[example.userId]} {(new Date(example.creationDate)).toLocaleDateString()}</Text>
                 <View style={styles.separatorCommentaries}/>
                 {this.renderUpvotes(example)}
                 <View style={styles.separatorCommentaries}/>
@@ -551,6 +575,8 @@ const styles = StyleSheet.create({
         height: 16,
         width: 16,
         marginLeft: 8,
-        marginRight: 8
+        marginRight: 8,
+        marginTop: 0,
+        marginBottom: 0
     }
   })

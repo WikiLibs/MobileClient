@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { View, Text, StyleSheet, ScrollView } from 'react-native'
+import { View, Text, StyleSheet, ScrollView, Image } from 'react-native'
 import { Button, Switch, TextInput } from 'react-native-paper'
 import ApiService from '../../ApiService'
 import showToast from './../../tools/Toast'
@@ -41,7 +41,18 @@ export default class Account extends React.Component {
                 .catch(error => {
                     console.log(error)
                 })
+            
+            global.api.getMePicture().then((Response) => {
+                let picture = this.fixPicture(Response.data, "image/jpeg")
+                this.setState({userPicture: picture})
+            })
         }
+    }
+
+    fixPicture(dataStr, dataType) { //MUI is a fucking framework unable to respect the HTTP standard, guess what let's hack it
+        const typeId = dataStr.indexOf(",");
+        const val = dataStr.substring(typeId + 1);
+        return "data:" + dataType + ";base64," + val;
     }
 
     onPressModify = () => {
@@ -111,6 +122,16 @@ export default class Account extends React.Component {
                             ? <View>
                                 <Text style={styles.title}>{this.state.user.pseudo}'s Account</Text>
                                 <View style={styles.separator}/>
+                                {this.state.userPicture
+                                    ? <View style={styles.userPictureContainer}>
+                                        <Image
+                                            style={{width: 128, height: 128, resizeMode: 'contain'}}
+                                            source={{uri: this.state.userPicture}}
+                                        />
+                                    </View>
+                                    : null
+                                }
+                                <View style={styles.separatorProfile}/>
                                 <Text style={styles.accountField}>Username</Text>
                                 <Text style={styles.accountValue}>{this.state.user.pseudo}</Text>
                                 <View style={styles.separatorProfile}/>
@@ -226,6 +247,13 @@ export default class Account extends React.Component {
                 global.api.getMe().then((Response) =>{
                     this.setState({user: Response.data})
                 })
+                global.api.getMePicture().then((Response) => {
+                    let picture = this.fixPicture(Response.data, "image/jpeg")
+                    this.setState({userPicture: picture})
+                })
+            })
+            .catch(error => {
+                showToast("Error: couldn't login")
             })
     }
 
@@ -505,6 +533,7 @@ export default class Account extends React.Component {
     }
 
     render = () => {
+        console.log(this.state.userPicture)
         return (
             <ScrollView style={styles.container}>
                 {this.state.isConnected
@@ -578,5 +607,12 @@ const styles = StyleSheet.create({
         marginTop: 7,
         marginBottom: 7,
         backgroundColor: '#EBEBEB'
+    },
+    userPictureContainer: {
+        borderRadius: 4,
+        borderWidth: 2,
+        padding: 4,
+        alignSelf: 'flex-start',
+        marginBottom: 32
     }
 })
