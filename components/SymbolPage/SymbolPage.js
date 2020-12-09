@@ -29,9 +29,34 @@ export default class SymbolPage extends React.Component {
 
     componentDidMount = async () => {
         let symbolId = this.props.route.params.params.symbolId
-        let listExample = await global.api.getExamples(symbolId)
+        /* let listExample = await global.api.getExamples(symbolId) */
         this.setState({symbolId: symbolId});
 
+        /* let mapIdPseudo = {};
+        let mapComments = {};
+        let comments = {};
+        listExample.data.forEach(elem => {
+            global.api.getUser(elem.userId).then(response => {mapIdPseudo[elem.userId] = response.data.pseudo});
+            global.api.getComments(elem.id, 1).then(response => {
+                mapComments[elem.id] = response.data
+                response.data.data.map(comment => {
+                    global.api.getUser(comment.userId).then(response => {mapIdPseudo[comment.userId] = response.data.pseudo})
+                })
+            });
+            comments[elem.id] = "";
+        })
+
+        this.setState({mapIdPseudo: mapIdPseudo});
+        this.setState({listExample: listExample.data});
+        this.setState({mapComments: mapComments});
+        this.setState({comment: comments}); */
+
+        await this.getExamples(symbolId)
+        global.api.getSymbolById(symbolId).then(response => { this.setState(response.data); });
+    }
+
+    getExamples = async (symbolId) => {
+        let listExample = await global.api.getExamples(symbolId)
         let mapIdPseudo = {};
         let mapComments = {};
         let comments = {};
@@ -50,8 +75,6 @@ export default class SymbolPage extends React.Component {
         this.setState({listExample: listExample.data});
         this.setState({mapComments: mapComments});
         this.setState({comment: comments});
-
-        global.api.getSymbolById(symbolId).then(response => { this.setState(response.data); });
     }
 
     getSymbolType = () => {
@@ -203,6 +226,7 @@ export default class SymbolPage extends React.Component {
                     tmpComment: ""
                 })
                 showToast("Successfuly posted message")
+                this.getExamples(this.state.symbolId)
             })
             .catch(error => {
                 console.log(error)
@@ -242,6 +266,7 @@ export default class SymbolPage extends React.Component {
         global.api.upvoteExample(example.id)
             .then(() => {
                 showToast("Successfuly upvoted")
+                this.getExamples(this.state.symbolId)
             })
             .catch(() => {
                 showToast("Error happened while upvoting")
@@ -256,6 +281,7 @@ export default class SymbolPage extends React.Component {
         global.api.downvoteExample(example.id)
             .then(() => {
                 showToast("Successfuly downvoted")
+                this.getExamples(this.state.symbolId)
             })
             .catch(() => {
                 showToast("Error happened while downvoting")
