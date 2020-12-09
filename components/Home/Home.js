@@ -79,8 +79,9 @@ const styles = StyleSheet.create({
         flexShrink: 1
     },
     headerTextContainer: {
+        flex: 1,
         marginLeft: 32,
-        marginRight: 32,
+        marginRight: 16,
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between'
@@ -101,7 +102,7 @@ const styles = StyleSheet.create({
     headerImage: {
         height: 100,
         width: 100,
-        marginLeft: 32
+        marginLeft: 16
     },
     mainContent: {
         margin: 32,

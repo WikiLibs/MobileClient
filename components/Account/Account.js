@@ -399,8 +399,10 @@ export default class Account extends React.Component {
             this.state.registerEmail === '' ||
             this.state.registerUsername === '' ||
             this.state.registerPassword
-        )
+        ) {
             this.setState({message: 'Please check that you filled all mandatory fields'})
+            return
+        }
         
         let state = {
             firstName: this.state.registerFirstname,

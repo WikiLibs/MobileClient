@@ -100,7 +100,7 @@ const TreeList = ({
                     <TouchableOpacity onPress={() => handleElementClicked(option, level)}>
                         <View style={{height: 'auto', display: 'flex', flexDirection: 'row', marginLeft: level * 32, marginBottom: 8, alignItems: 'center'}}>
                             {getIndicator(option, selectedOptions)}
-                            <Text>{option.name}</Text>
+                            <Text style={{flex: 1}}>{option.name}</Text>
                         </View>
                     </TouchableOpacity>
                     {(option.subContent && option.subContent.length > 0 && selectedOptions[option.id]) &&
